@@ -39,6 +39,8 @@ def accuracy_vs_confidence(model,
     top_class = []
     with torch.no_grad():
         for X_batch, y_batch in data_loader:
+            X_batch = X_batch.to(model.device)
+            y_batch = y_batch.to(model.device)
             # probabilities (without sampling)
             if no_samples is None:
                 batch_logits = model.predict(X_batch)
@@ -64,9 +66,9 @@ def accuracy_vs_confidence(model,
             labels.append(y_batch)
             top_prob.append(batch_top_prob)
             top_class.append(batch_top_class)
-    labels = torch.cat([_ for _ in labels], dim=0).squeeze().data.numpy()
-    top_prob = torch.cat([_ for _ in top_prob], dim=0).squeeze().data.numpy()
-    top_class = torch.cat([_ for _ in top_class], dim=0).squeeze().data.numpy()
+    labels = torch.cat([_ for _ in labels], dim=0).data.cpu().numpy().squeeze()
+    top_prob = torch.cat([_ for _ in top_prob], dim=0).data.cpu().numpy().squeeze()
+    top_class = torch.cat([_ for _ in top_class], dim=0).data.cpu().numpy().squeeze()
 
     # confidence binning & accuracy evaluation
     confidence_edges = np.linspace(0, 1, no_bins+1)
