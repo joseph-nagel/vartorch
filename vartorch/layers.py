@@ -97,7 +97,7 @@ class VariationalLinearWithUncertainLogits(nn.Module):
 
     Summary
     -------
-    A variational linea layer with uncertain logits is implemented.
+    A variational linear layer with uncertain logits is implemented.
     Here, logits follow Gaussians with learnable means and standard deviations.
     This is supposed to represent aleatoric uncertainties.
 
