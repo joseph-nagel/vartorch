@@ -123,7 +123,7 @@ class VariationalClassifier(object):
         for idx in range(no_samples):
             logits = self.model(X)
             logits_list.append(logits)
-        y_logits = torch.stack([logits for logits in logits_list], dim=-1).squeeze()
+        y_logits = torch.stack([logits for logits in logits_list], dim=-1).squeeze(dim=-1)
         return y_logits
 
     def predict_proba(self, X, no_samples=1):
