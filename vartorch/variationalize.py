@@ -174,7 +174,7 @@ class VariationalClassifier(object):
             train_losses.append(train_loss)
             test_losses.append(test_loss)
             test_accs.append(test_acc)
-            print('Started training: {}, test loss: {:.4f}, test acc.: {:.4f}' \
+            print('Started training: {}, test loss: {:.4e}, test acc.: {:.4f}' \
                   .format(self.epoch, test_loss, test_acc))
         for epoch_idx in range(no_epochs):
             train_loss = self.train_epoch(no_samples, log_interval)
@@ -185,7 +185,7 @@ class VariationalClassifier(object):
                 test_acc = self.test_acc(no_samples=1, threshold=threshold)
                 test_losses.append(test_loss)
                 test_accs.append(test_acc)
-                print('Finished epoch: {}, test loss: {:.4f}, test acc.: {:.4f}' \
+                print('Finished epoch: {}, test loss: {:.4e}, test acc.: {:.4f}' \
                       .format(self.epoch, test_loss, test_acc))
         history = {'no_epochs': no_epochs,
                    'train_loss': train_losses,
@@ -216,7 +216,7 @@ class VariationalClassifier(object):
                 running_loss = moving_average(batch_losses, window=3, mode='last')
             if log_interval is not None:
                 if (batch_idx+1) % log_interval == 0 or (batch_idx+1) == len(self.train_loader):
-                    print('Epoch: {} ({}/{}), batch loss: {:.4f}, running loss: {:.4f}' \
+                    print('Epoch: {} ({}/{}), batch loss: {:.4e}, running loss: {:.4e}' \
                           .format(self.epoch+1, batch_idx+1, len(self.train_loader), batch_loss, running_loss))
         return running_loss
 
