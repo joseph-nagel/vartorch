@@ -38,13 +38,13 @@ class Reparametrize(nn.Module):
     def forward(self, mu, rho):
         if self.sampling: # sample around the mean
             y = reparametrize(mu, rho)
-        else: # just the mean
+        else: # just return the mean
             y = mu
         return y
 
 def reparametrize(mu, rho):
     '''Perform the reparametrization trick.'''
-    std = torch.log(1 + torch.exp(rho))
-    eps = torch.randn_like(std)
-    return mu + (eps * std)
+    sigma = torch.log(1 + torch.exp(rho))
+    eps = torch.randn_like(sigma)
+    return mu + (eps * sigma)
 
