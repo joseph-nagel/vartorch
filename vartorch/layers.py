@@ -80,7 +80,7 @@ class VariationalLinear(nn.Module):
         if self.sampling: # sample from q
             w = reparametrize(self.w_mu, self.w_rho)
             b = reparametrize(self.b_mu, self.b_rho)
-        else: # mean of q
+        else: # return mean of q
             w = self.w_mu
             b = self.b_mu
         y = nn.functional.linear(X, w, b)
@@ -117,18 +117,22 @@ class VariationalLinearWithUncertainLogits(nn.Module):
                                            out_features=out_features,
                                            weight_std=weight_std,
                                            bias_std=bias_std)
-        self.logits_rho = nn.Linear(in_features=in_features,
-                                    out_features=out_features)
+        self.logits_rho = VariationalLinear(in_features=in_features,
+                                            out_features=out_features,
+                                            weight_std=weight_std,
+                                            bias_std=bias_std)
         self.reparametrize = Reparametrize()
 
     def epistemic(self):
         '''Set epistemic mode.'''
         self.logits_mu.sampling = True
+        self.logits_rho.sampling = True
         self.reparametrize.sampling = False
 
     def aleatoric(self):
         '''Set aleatoric mode.'''
         self.logits_mu.sampling = False
+        self.logits_rho.sampling = False
         self.reparametrize.sampling = True
 
     def forward(self, X):
@@ -163,7 +167,10 @@ class VariationalLinearWithLearnableTemperature(nn.Module):
                                         out_features=out_features,
                                         weight_std=weight_std,
                                         bias_std=bias_std)
-        self.logtemp = nn.Linear(in_features=in_features, out_features=1)
+        self.logtemp = VariationalLinear(in_features=in_features,
+                                         out_features=1,
+                                         weight_std=weight_std,
+                                         bias_std=bias_std)
 
     def forward(self, X):
         logits = self.logits(X)
