@@ -13,7 +13,7 @@ Modules
 confidence : Confidence well-calibration.
 divergences : Kullback-Leibler divergences.
 layers : Variational layers.
-reparametrization : Reparametrization trick.
+reparametrization : Reparametrization tricks.
 variationalize : Model variationalization.
 
 '''
@@ -28,6 +28,5 @@ __COPYRIGHT__ = 'Copyright 2020 Joseph Benjamin Nagel'
 
 from .confidence import accuracy_vs_confidence
 from .layers import VariationalLinear
-from .reparametrization import Reparametrize, reparametrize
 from .variationalize import VariationalClassifier
 
