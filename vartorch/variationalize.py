@@ -3,7 +3,8 @@ Model variationalization.
 
 Summary
 -------
-The core class 'VariationalClassifier' enables stochastic variational inference.
+The core class 'VariationalClassification' implementes a scheme
+for stochastic variational inference in classification problems.
 It turns models with variational and other layers into Bayesian classifiers.
 While the likelihood determines whether the problem is binary or multi-class,
 the model layers determine the unknown weights and their treatment.
@@ -18,9 +19,9 @@ import torch
 import torch.distributions as dist
 from torchutils.tools import moving_average
 
-class VariationalClassifier(object):
+class VariationalClassification(object):
     '''
-    Variationalizing classifier models.
+    Variationalizing classification models.
 
     Summary
     -------
@@ -66,15 +67,15 @@ class VariationalClassifier(object):
             self.device = device
         self.model = self.model.to(self.device)
 
-    def sample(self, mode=True):
+    def sample(self, sample_mode=True):
         '''Set sampling mode of the model layers.'''
         for layer in self.model.modules():
             if hasattr(layer, 'sampling'):
-                layer.sampling = mode
+                layer.sampling = sample_mode
 
-    def train(self, mode=True):
+    def train(self, train_mode=True):
         '''Set training mode of the model.'''
-        self.model.train(mode)
+        self.model.train(train_mode)
 
     def ll(self, X, y):
         '''Compute the log-likelihood.'''

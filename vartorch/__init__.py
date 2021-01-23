@@ -28,5 +28,5 @@ __COPYRIGHT__ = 'Copyright 2020 Joseph Benjamin Nagel'
 
 from .confidence import accuracy_vs_confidence
 from .layers import VariationalLinear
-from .variationalize import VariationalClassifier
+from .variationalize import VariationalClassification
 
