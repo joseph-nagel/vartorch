@@ -143,7 +143,7 @@ class VariationalClassification(object):
                 sampled_probs = torch.softmax(sampled_logits, dim=1)
             elif self.likelihood_type == 'Bernoulli':
                 sampled_probs = torch.sigmoid(sampled_logits)
-            y_probs = torch.mean(sampled_probs, axis=-1)
+            y_probs = torch.mean(sampled_probs, dim=-1)
         return y_probs
 
     def predict_top(self, X, no_samples=1, threshold=0.5):
