@@ -3,7 +3,7 @@ Model variationalization.
 
 Summary
 -------
-The core class 'VariationalClassification' implementes a scheme
+The core class 'VariationalClassification' implements a scheme
 for stochastic variational inference in classification problems.
 It turns models with variational and other layers into Bayesian classifiers.
 While the likelihood determines whether the problem is binary or multi-class,
@@ -28,7 +28,7 @@ class VariationalClassification(object):
     This class supports stochastic variational inference by equipping classifier
     models including variational and normal layers with an MC simulator of the ELBO.
     This involves an expectation over the log-likelihood and a KL divergence term.
-    The likelihood is defined based on a Categorical or a Bernoulli distribution.
+    The likelihood is defined based on a categorical or a Bernoulli distribution.
     The KL divergence is automatically accumulated from the involved layers.
     While the likelihood term is estimated by means of MC sampling,
     the KL terms can be either analytical or simulated.
