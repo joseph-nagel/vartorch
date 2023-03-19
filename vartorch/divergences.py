@@ -21,6 +21,7 @@ It can be used in conjunction with black-box variational inference schemes.
 import torch
 import torch.distributions as dist
 
+
 def kl_div_pytorch(q_mu, q_sigma, p_sigma=1.):
     '''Compute the KL divergence with PyTorch distributions.'''
     q = dist.Normal(q_mu, q_sigma) # variational distribution
@@ -28,10 +29,12 @@ def kl_div_pytorch(q_mu, q_sigma, p_sigma=1.):
     kl = dist.kl_divergence(q, p).sum()
     return kl
 
+
 def kl_div_analytical(q_mu, q_sigma):
     '''Compute KL divergence analytically.'''
     kl = 0.5 * torch.sum(q_sigma**2 + q_mu**2 - torch.log(q_sigma**2) - 1)
     return kl
+
 
 def kl_div_montecarlo(z, q_mu, q_sigma, p_sigma=1.):
     '''Compute KL divergence with a single MC sample.'''

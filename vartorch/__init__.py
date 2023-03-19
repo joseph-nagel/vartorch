@@ -20,13 +20,17 @@ variationalize : Model variationalization.
 
 __COPYRIGHT__ = 'Copyright 2020 Joseph Benjamin Nagel'
 
-# from . import analysis
-# from . import divergences
-# from . import layers
-# from . import reparametrization
-# from . import variationalize
+
+from . import analysis
+from . import divergences
+from . import layers
+from . import reparametrization
+from . import variationalize
+
 
 from .analysis import anomaly_score, calibration_metrics
+
 from .layers import VariationalLinear
+
 from .variationalize import VariationalClassification
 

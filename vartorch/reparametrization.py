@@ -20,15 +20,18 @@ Here, the standard deviation is calculated from real-valued parameters via simpl
 
 import torch
 
+
 def reparametrize(mu, sigma):
     '''Sample with the reparametrization trick.'''
     eps = torch.randn_like(sigma)
     return mu + (eps * sigma)
 
+
 def sigma_from_log(log_sigma):
     '''Calculate sigma from log-sigma.'''
     sigma = torch.exp(log_sigma) # log_sigma = torch.log(sigma)
     return sigma
+
 
 def sigma_from_rho(rho):
     '''Calculate sigma from rho.'''

@@ -21,6 +21,7 @@ import numpy as np
 import torch
 import torch.distributions as dist
 
+
 def anomaly_score(model,
                   data_loader,
                   mode='entropy',
@@ -54,11 +55,13 @@ def anomaly_score(model,
     '''
 
     # predictions
-    _, probs, _, top_prob = _extract_predict(model,
-                                             data_loader,
-                                             no_epochs,
-                                             threshold,
-                                             **kwargs)
+    _, probs, _, top_prob = _extract_predict(
+        model,
+        data_loader,
+        no_epochs,
+        threshold,
+        **kwargs
+    )
 
     # scores
     if mode == 'entropy':
@@ -71,6 +74,7 @@ def anomaly_score(model,
 
     return score
 
+
 def _entropy(probs):
     '''Compute entropy score.'''
     if probs.shape[-1] == 1: # binary classifier
@@ -79,10 +83,12 @@ def _entropy(probs):
         entropy = dist.Categorical(probs=probs).entropy()
     return entropy
 
+
 def _maxprob_score(top_prob):
     '''Compute maxprob score.'''
     score = 1 - top_prob
     return score
+
 
 def calibration_metrics(model,
                         data_loader,
@@ -117,11 +123,13 @@ def calibration_metrics(model,
     '''
 
     # predictions
-    labels, _, top_class, top_prob = _extract_predict(model,
-                                                      data_loader,
-                                                      no_epochs,
-                                                      threshold,
-                                                      **kwargs)
+    labels, _, top_class, top_prob = _extract_predict(
+        model,
+        data_loader,
+        no_epochs,
+        threshold,
+        **kwargs
+    )
 
     # arrays
     labels = _make_array(labels).squeeze()
@@ -143,10 +151,13 @@ def calibration_metrics(model,
                           if binned_no_samples[idx] != 0 else np.nan
 
     # calibration errors
-    binned_ce, ece, mce = _calibration_errors(binned_conf, binned_acc, binned_no_samples)
+    binned_ce, ece, mce = _calibration_errors(
+        binned_conf, binned_acc, binned_no_samples
+    )
     ce_dict = {'CEs': binned_ce, 'ECE': ece, 'MCE': mce}
 
     return conf_edges, binned_acc, ce_dict
+
 
 def _calibration_errors(binned_conf, binned_acc, binned_no_samples):
     '''Compute calibration errors (bin-wise, expected and maximum).'''
@@ -155,6 +166,8 @@ def _calibration_errors(binned_conf, binned_acc, binned_no_samples):
     ece = np.nansum(binned_no_samples * binned_ce) / np.sum(binned_no_samples)
     return binned_ce, ece, mce
 
+
+@torch.no_grad()
 def _extract_predict(model,
                      data_loader,
                      no_epochs=1,
@@ -194,21 +207,28 @@ def _extract_predict(model,
     # labels and probabilities
     labels_list = []
     probs_list = []
-    with torch.no_grad():
-        for epoch_idx in range(no_epochs):
-            for X_batch, y_batch in data_loader:
-                X_batch = X_batch.to(device)
-                y_batch = y_batch.to(device)
-                if hasattr(model, 'predict_proba'): # VariationalClassification
-                    batch_probs = model.predict_proba(X_batch, **kwargs)
-                else: # PyTorch module
-                    batch_logits = model(X_batch)
-                    if batch_logits.shape[-1] == 1: # binary classifier
-                        batch_probs = torch.sigmoid(batch_logits)
-                    else: # multi-class classifier
-                        batch_probs = torch.softmax(batch_logits, dim=-1)
-                labels_list.append(y_batch)
-                probs_list.append(batch_probs)
+    for epoch_idx in range(no_epochs):
+        for X_batch, y_batch in data_loader:
+
+            X_batch = X_batch.to(device)
+            y_batch = y_batch.to(device)
+
+            # predict probabilities directly (VariationalClassification)
+            if hasattr(model, 'predict_proba'):
+                batch_probs = model.predict_proba(X_batch, **kwargs)
+            # predict logits first (PyTorch module)
+            else:
+                batch_logits = model(X_batch)
+
+                if batch_logits.shape[-1] == 1: # binary classifier
+                    batch_probs = torch.sigmoid(batch_logits)
+
+                else: # multi-class classifier
+                    batch_probs = torch.softmax(batch_logits, dim=-1)
+
+            labels_list.append(y_batch)
+            probs_list.append(batch_probs)
+
     labels = torch.cat(labels_list, dim=0)
     probs = torch.cat(probs_list, dim=0)
 
@@ -220,6 +240,7 @@ def _extract_predict(model,
         top_prob, top_class = torch.topk(probs, k=1, dim=1)
 
     return labels, probs, top_class, top_prob
+
 
 def _make_array(tensor):
     '''Transform tensor into array.'''
