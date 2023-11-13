@@ -25,7 +25,7 @@ import torch.distributions as dist
 def anomaly_score(model,
                   data_loader,
                   mode='entropy',
-                  no_epochs=1,
+                  num_epochs=1,
                   threshold=0.5,
                   **kwargs):
     '''
@@ -47,7 +47,7 @@ def anomaly_score(model,
         Data-generating loader.
     mode : {'entropy', 'maxprob'}
         Determines the score type.
-    no_epochs : int
+    num_epochs : int
         Number of epochs.
     threshold : float
         Binary probability threshold.
@@ -58,7 +58,7 @@ def anomaly_score(model,
     _, probs, _, top_prob = _extract_predict(
         model,
         data_loader,
-        no_epochs,
+        num_epochs,
         threshold,
         **kwargs
     )
@@ -92,8 +92,8 @@ def _maxprob_score(top_prob):
 
 def calibration_metrics(model,
                         data_loader,
-                        no_bins=10,
-                        no_epochs=1,
+                        num_bins=10,
+                        num_epochs=1,
                         threshold=0.5,
                         **kwargs):
     '''
@@ -113,9 +113,9 @@ def calibration_metrics(model,
         Logits-predicting model.
     data_loader : PyTorch data loader
         Data-generating loader.
-    no_bins : int
+    num_bins : int
         Number of confidence bins.
-    no_epochs : int
+    num_epochs : int
         Number of epochs.
     threshold : float
         Binary probability threshold.
@@ -126,7 +126,7 @@ def calibration_metrics(model,
     labels, _, top_class, top_prob = _extract_predict(
         model,
         data_loader,
-        no_epochs,
+        num_epochs,
         threshold,
         **kwargs
     )
@@ -137,40 +137,40 @@ def calibration_metrics(model,
     top_prob = _make_array(top_prob).squeeze()
 
     # confidence bins and accuracies
-    conf_edges = np.linspace(0, 1, no_bins+1)
+    conf_edges = np.linspace(0, 1, num_bins+1)
     binned_conf = (conf_edges[1:] + conf_edges[:-1]) / 2
-    binned_acc = np.zeros(no_bins)
-    binned_no_samples = np.zeros(no_bins, dtype='int')
-    for idx in range(no_bins):
+    binned_acc = np.zeros(num_bins)
+    binned_num_samples = np.zeros(num_bins, dtype='int')
+    for idx in range(num_bins):
         lower = conf_edges[idx]
         upper = conf_edges[idx+1]
         ids = np.where(np.logical_and(top_prob>=lower, top_prob<upper))[0]
-        binned_no_samples[idx] = len(ids)
+        binned_num_samples[idx] = len(ids)
         binned_acc[idx] = (np.sum(labels[ids] == top_class[ids])) \
-                          / binned_no_samples[idx] \
-                          if binned_no_samples[idx] != 0 else np.nan
+                          / binned_num_samples[idx] \
+                          if binned_num_samples[idx] != 0 else np.nan
 
     # calibration errors
     binned_ce, ece, mce = _calibration_errors(
-        binned_conf, binned_acc, binned_no_samples
+        binned_conf, binned_acc, binned_num_samples
     )
     ce_dict = {'CEs': binned_ce, 'ECE': ece, 'MCE': mce}
 
     return conf_edges, binned_acc, ce_dict
 
 
-def _calibration_errors(binned_conf, binned_acc, binned_no_samples):
+def _calibration_errors(binned_conf, binned_acc, binned_num_samples):
     '''Compute calibration errors (bin-wise, expected and maximum).'''
     binned_ce = np.abs(binned_acc - binned_conf)
     mce = np.max([e for e in binned_ce if not np.isnan(e)])
-    ece = np.nansum(binned_no_samples * binned_ce) / np.sum(binned_no_samples)
+    ece = np.nansum(binned_num_samples * binned_ce) / np.sum(binned_num_samples)
     return binned_ce, ece, mce
 
 
 @torch.no_grad()
 def _extract_predict(model,
                      data_loader,
-                     no_epochs=1,
+                     num_epochs=1,
                      threshold=0.5,
                      **kwargs):
     '''
@@ -187,7 +187,7 @@ def _extract_predict(model,
         Logits-predicting model.
     data_loader : PyTorch data loader
         Data-generating loader.
-    no_epochs : int
+    num_epochs : int
         Number of epochs.
     threshold : float
         Binary probability threshold.
@@ -207,7 +207,7 @@ def _extract_predict(model,
     # labels and probabilities
     labels_list = []
     probs_list = []
-    for epoch_idx in range(no_epochs):
+    for epoch_idx in range(num_epochs):
         for X_batch, y_batch in data_loader:
 
             X_batch = X_batch.to(device)

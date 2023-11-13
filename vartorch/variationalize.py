@@ -55,7 +55,7 @@ class VariationalClassification():
     Some high-level methods automatically use the appropriate mode, for instance,
     'train_epoch' or 'test_loss' have to use sampling for the loss simulation.
     Another example is 'predict_proba' that computes posterior predictive probabilities
-    with sampling (no_samples>1) and mean weight probabilites without (no_samples=1).
+    with sampling (num_samples>1) and mean weight probabilites without (num_samples=1).
     The same behavior is found in 'predict_top' and 'test_acc', too.
 
     '''
@@ -104,21 +104,21 @@ class VariationalClassification():
                 kl += layer.kl_acc.to(self.device)
         return kl
 
-    def elbo(self, X, y, no_samples=1, ll_weight=1, kl_weight=1):
+    def elbo(self, X, y, num_samples=1, ll_weight=1, kl_weight=1):
         '''Simulate the ELBO by MC sampling.'''
         ll = torch.tensor(0.0, device=self.device)
         kl = torch.tensor(0.0, device=self.device)
-        for idx in range(no_samples):
+        for idx in range(num_samples):
             ll += self.ll(X, y)
             kl += self.kl()
-        ll /= no_samples
-        kl /= no_samples
+        ll /= num_samples
+        kl /= num_samples
         elbo = ll * ll_weight - kl * kl_weight
         return elbo
 
-    def loss(self, X, y, no_samples=1, ll_weight=1, kl_weight=1):
+    def loss(self, X, y, num_samples=1, ll_weight=1, kl_weight=1):
         '''Simulate the negative-ELBO loss.'''
-        loss = -self.elbo(X, y, no_samples, ll_weight, kl_weight)
+        loss = -self.elbo(X, y, num_samples, ll_weight, kl_weight)
         return loss
 
     def __call__(self, X):
@@ -126,19 +126,19 @@ class VariationalClassification():
         y_logits = self.model(X)
         return y_logits
 
-    def predict(self, X, no_samples=1):
+    def predict(self, X, num_samples=1):
         '''Predict logits.'''
         logits_list = []
-        for idx in range(no_samples):
+        for idx in range(num_samples):
             logits = self.model(X)
             logits_list.append(logits)
         y_logits = torch.stack(logits_list, dim=-1).squeeze(dim=-1)
         return y_logits
 
-    def predict_proba(self, X, no_samples=1):
+    def predict_proba(self, X, num_samples=1):
         '''Predict probabilities (mean weight or posterior predictive).'''
         # posterior mean weights
-        if no_samples == 1:
+        if num_samples == 1:
             self.sample(False)
             y_logits = self.predict(X)
 
@@ -150,7 +150,7 @@ class VariationalClassification():
         # posterior predictive distribution
         else:
             self.sample(True)
-            sampled_logits = self.predict(X, no_samples)
+            sampled_logits = self.predict(X, num_samples)
 
             if self.likelihood_type == 'Categorical':
                 sampled_probs = torch.softmax(sampled_logits, dim=1)
@@ -161,9 +161,9 @@ class VariationalClassification():
 
         return y_probs
 
-    def predict_top(self, X, no_samples=1, threshold=0.5):
+    def predict_top(self, X, num_samples=1, threshold=0.5):
         '''Predict top class and probability (mean weight or posterior predictive).'''
-        y_probs = self.predict_proba(X, no_samples)
+        y_probs = self.predict_proba(X, num_samples)
 
         if self.likelihood_type == 'Categorical':
             top_prob, top_class = torch.topk(y_probs, k=1, dim=1)
@@ -180,8 +180,8 @@ class VariationalClassification():
         self.val_loader = val_loader
 
     def training(self,
-                 no_epochs,
-                 no_samples=1,
+                 num_epochs,
+                 num_samples=1,
                  log_interval=100,
                  threshold=0.5,
                  initial_test=True):
@@ -193,9 +193,9 @@ class VariationalClassification():
         val_accs = []
 
         if initial_test:
-            train_loss = self.test_loss(self.train_loader, no_samples, all_batches=False)
-            val_loss = self.test_loss(self.val_loader, no_samples, all_batches=False)
-            val_acc = self.test_acc(self.val_loader, no_samples=1, threshold=threshold)
+            train_loss = self.test_loss(self.train_loader, num_samples, all_batches=False)
+            val_loss = self.test_loss(self.val_loader, num_samples, all_batches=False)
+            val_acc = self.test_acc(self.val_loader, num_samples=1, threshold=threshold)
 
             train_losses.append(train_loss)
             val_losses.append(val_loss)
@@ -204,15 +204,15 @@ class VariationalClassification():
             print('Started training: {}, val. loss: {:.2e}, val. acc.: {:.4f}' \
                   .format(self.epoch, val_loss, val_acc))
 
-        for epoch_idx in range(no_epochs):
-            train_loss = self.train_epoch(no_samples, log_interval)
+        for epoch_idx in range(num_epochs):
+            train_loss = self.train_epoch(num_samples, log_interval)
             train_losses.append(train_loss)
 
             self.epoch += 1
 
             if self.val_loader is not None:
-                val_loss = self.test_loss(no_samples=no_samples, all_batches=False)
-                val_acc = self.test_acc(no_samples=1, threshold=threshold)
+                val_loss = self.test_loss(num_samples=num_samples, all_batches=False)
+                val_acc = self.test_acc(num_samples=1, threshold=threshold)
 
                 val_losses.append(val_loss)
                 val_accs.append(val_acc)
@@ -220,14 +220,14 @@ class VariationalClassification():
                 print('Finished epoch: {}, val. loss: {:.2e}, val. acc.: {:.4f}' \
                       .format(self.epoch, val_loss, val_acc))
 
-        history = {'no_epochs': no_epochs,
+        history = {'num_epochs': num_epochs,
                    'train_loss': train_losses,
                    'val_loss': val_losses,
                    'val_acc': val_accs}
 
         return history
 
-    def train_epoch(self, no_samples=1, log_interval=100):
+    def train_epoch(self, num_samples=1, log_interval=100):
         '''Perform a single training epoch.'''
         self.sample(True)
         self.train(True)
@@ -242,7 +242,7 @@ class VariationalClassification():
             loss = self.loss(
                 X_batch,
                 y_batch,
-                no_samples=no_samples,
+                num_samples=num_samples,
                 ll_weight=len(self.train_loader.dataset) / X_batch.shape[0]
             )
             loss.backward()
@@ -266,7 +266,7 @@ class VariationalClassification():
     @torch.no_grad()
     def test_loss(self,
                   test_loader=None,
-                  no_samples=1,
+                  num_samples=1,
                   all_batches=False):
         '''Compute loss over a test set with one batch or all.'''
         self.sample(True)
@@ -287,7 +287,7 @@ class VariationalClassification():
                 loss = self.loss(
                     X_batch,
                     y_batch,
-                    no_samples=no_samples,
+                    num_samples=num_samples,
                     kl_weight=X_batch.shape[0] / len(test_loader.dataset)
                 )
 
@@ -302,7 +302,7 @@ class VariationalClassification():
             loss = self.loss(
                 X_batch,
                 y_batch,
-                no_samples=no_samples,
+                num_samples=num_samples,
                 ll_weight=len(test_loader.dataset) / X_batch.shape[0]
             )
 
@@ -313,8 +313,8 @@ class VariationalClassification():
     @torch.no_grad()
     def test_acc(self,
                  test_loader=None,
-                 no_samples=1,
-                 no_epochs=1,
+                 num_samples=1,
+                 num_epochs=1,
                  threshold=0.5):
         '''Compute accuracy over a complete test set.'''
         self.train(False)
@@ -322,23 +322,23 @@ class VariationalClassification():
         if test_loader is None:
             test_loader = self.val_loader
 
-        no_total = 0
-        no_correct = 0
+        num_total = 0
+        num_correct = 0
 
-        for epoch_idx in range(no_epochs):
+        for epoch_idx in range(num_epochs):
             for X_batch, y_batch in test_loader:
 
                 X_batch = X_batch.to(self.device)
                 y_batch = y_batch.to(self.device)
 
-                no_total += X_batch.shape[0]
+                num_total += X_batch.shape[0]
 
-                top_class, top_prob = self.predict_top(X_batch, no_samples, threshold)
+                top_class, top_prob = self.predict_top(X_batch, num_samples, threshold)
 
                 is_correct = top_class.squeeze().int() == y_batch.squeeze().int()
-                no_correct += torch.sum(is_correct).data.item()
+                num_correct += torch.sum(is_correct).data.item()
 
-        test_acc = no_correct / no_total
+        test_acc = num_correct / num_total
 
         return test_acc
 
