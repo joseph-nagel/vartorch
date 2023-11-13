@@ -87,32 +87,37 @@ class VariationalClassification():
 
     def ll(self, X, y):
         '''Compute the log-likelihood.'''
-        y_logits = self.model(X) # log of unnormalized probabilities (scores)
+        y_logits = self.model(X)
+
         if self.likelihood_type == 'Categorical':
-            # y_logprobs = nn.functional.log_softmax(y_logits, dim=1) # log-probabilities
-            ll = dist.Categorical(logits=y_logits).log_prob(y).sum() # automatically normalizes
+            ll = dist.Categorical(logits=y_logits).log_prob(y).sum()
         elif self.likelihood_type == 'Bernoulli':
-            # y_logprobs = nn.functional.logsigmoid(y_logits.squeeze()) # log-probabilities
-            ll = dist.Bernoulli(logits=y_logits.squeeze()).log_prob(y.float()).sum() # automatically normalizes
+            ll = dist.Bernoulli(logits=y_logits.squeeze()).log_prob(y.float()).sum()
+
         return ll
 
     def kl(self):
         '''Accumulate KL divergence from model layers.'''
         kl = torch.tensor(0.0, device=self.device)
+
         for layer in self.model.modules():
             if hasattr(layer, 'kl_acc'):
-                kl += layer.kl_acc.to(self.device)
+                kl = kl + layer.kl_acc.to(self.device)
+
         return kl
 
     def elbo(self, X, y, num_samples=1, ll_weight=1, kl_weight=1):
         '''Simulate the ELBO by MC sampling.'''
         ll = torch.tensor(0.0, device=self.device)
         kl = torch.tensor(0.0, device=self.device)
+
         for idx in range(num_samples):
-            ll += self.ll(X, y)
-            kl += self.kl()
-        ll /= num_samples
-        kl /= num_samples
+            ll = ll + self.ll(X, y)
+            kl = kl + self.kl()
+
+        ll = ll / num_samples
+        kl = kl / num_samples
+
         elbo = ll * ll_weight - kl * kl_weight
         return elbo
 
@@ -132,11 +137,13 @@ class VariationalClassification():
         for idx in range(num_samples):
             logits = self.model(X)
             logits_list.append(logits)
+
         y_logits = torch.stack(logits_list, dim=-1).squeeze(dim=-1)
         return y_logits
 
     def predict_proba(self, X, num_samples=1):
         '''Predict probabilities (mean weight or posterior predictive).'''
+
         # posterior mean weights
         if num_samples == 1:
             self.sample(False)
@@ -186,6 +193,7 @@ class VariationalClassification():
                  threshold=0.5,
                  initial_test=True):
         '''Perform a number of training epochs.'''
+
         self.epoch = 0
 
         train_losses = []
@@ -229,6 +237,7 @@ class VariationalClassification():
 
     def train_epoch(self, num_samples=1, log_interval=100):
         '''Perform a single training epoch.'''
+
         self.sample(True)
         self.train(True)
 
@@ -239,12 +248,14 @@ class VariationalClassification():
             y_batch = y_batch.to(self.device)
 
             self.optimizer.zero_grad()
+
             loss = self.loss(
                 X_batch,
                 y_batch,
                 num_samples=num_samples,
                 ll_weight=len(self.train_loader.dataset) / X_batch.shape[0]
             )
+
             loss.backward()
             self.optimizer.step()
 
@@ -269,6 +280,7 @@ class VariationalClassification():
                   num_samples=1,
                   all_batches=False):
         '''Compute loss over a test set with one batch or all.'''
+
         self.sample(True)
         self.train(False)
 
@@ -293,7 +305,7 @@ class VariationalClassification():
 
                 test_loss += loss.data.item()
 
-        # tes only one batch
+        # test only one batch
         else:
             X_batch, y_batch = next(iter(test_loader))
             X_batch = X_batch.to(self.device)
@@ -317,6 +329,7 @@ class VariationalClassification():
                  num_epochs=1,
                  threshold=0.5):
         '''Compute accuracy over a complete test set.'''
+
         self.train(False)
 
         if test_loader is None:

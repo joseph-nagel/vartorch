@@ -1,5 +1,5 @@
 '''
-Reparametrization tricks.
+Reparametrization issues.
 
 Summary
 -------

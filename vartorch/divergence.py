@@ -1,5 +1,5 @@
 '''
-Kullback-Leibler divergences.
+Kullback-Leibler divergence.
 
 Summary
 -------

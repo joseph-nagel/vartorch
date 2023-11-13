@@ -28,9 +28,9 @@ It can be used as component for building advanced layers.
 import torch
 import torch.nn as nn
 
-from .divergences import kl_div_pytorch
+from .divergence import kl_div_pytorch
 
-from .reparametrization import (
+from .reparam import (
     reparametrize,
     sigma_from_log,
     sigma_from_rho
@@ -57,6 +57,7 @@ class VariationalLayer(nn.Module):
 
     def __init__(self, param_mode='log'):
         super().__init__()
+
         self.parametrization = param_mode
         self.sampling = True
 
@@ -69,6 +70,7 @@ class VariationalLayer(nn.Module):
     def parametrization(self, param_mode):
         '''Set parametrization mode.'''
         self._parametrization = param_mode
+
         if param_mode == 'log':
             self.sigma = sigma_from_log
         elif param_mode == 'rho':
@@ -117,6 +119,7 @@ class VariationalLinear(VariationalLayer):
                  weight_std=1.,
                  bias_std=1.,
                  param_mode='log'):
+
         super().__init__(param_mode)
 
         self.in_features = in_features
@@ -182,6 +185,7 @@ class VariationalLinearWithUncertainLogits(VariationalLayer):
                  weight_std=1.,
                  bias_std=1.,
                  param_mode='log'):
+
         super().__init__(param_mode)
 
         self.logits_mu = VariationalLinear(
@@ -244,6 +248,7 @@ class VariationalLinearWithLearnableTemperature(VariationalLayer):
                  weight_std=1.,
                  bias_std=1.,
                  param_mode='log'):
+
         super().__init__(param_mode)
 
         self.logits = VariationalLinear(

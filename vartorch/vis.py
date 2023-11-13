@@ -9,7 +9,7 @@ def plot_data_2d(X,
                  labels=None,
                  colors=None,
                  ax=None):
-    '''Plot data point with labels on a two-dimensional plane.'''
+    '''Plot data points with labels on a two-dim. plane.'''
 
     if ax is None:
         fig, ax = plt.subplots()

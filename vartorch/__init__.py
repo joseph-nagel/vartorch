@@ -11,10 +11,10 @@ More general extensions are envisaged for the future.
 Modules
 -------
 analysis : Analysis tools.
-divergences : Kullback-Leibler divergences.
+divergence : Kullback-Leibler divergence.
 layers : Variational layers.
-reparametrization : Reparametrization tricks.
-variationalize : Model variationalization.
+reparam : Reparametrization issues.
+variational : Model variationalization.
 vis : Visualization tools.
 
 '''
@@ -23,10 +23,10 @@ __COPYRIGHT__ = 'Copyright 2020-2023 Joseph Benjamin Nagel'
 
 
 from . import analysis
-from . import divergences
+from . import divergence
 from . import layers
-from . import reparametrization
-from . import variationalize
+from . import reparam
+from . import variational
 from . import vis
 
 
@@ -34,7 +34,7 @@ from .analysis import anomaly_score, calibration_metrics
 
 from .layers import VariationalLinear
 
-from .variationalize import VariationalClassification
+from .variational import VariationalClassification
 
 from .vis import plot_data_2d, plot_function_2d
 
