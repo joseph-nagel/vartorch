@@ -15,10 +15,11 @@ divergences : Kullback-Leibler divergences.
 layers : Variational layers.
 reparametrization : Reparametrization tricks.
 variationalize : Model variationalization.
+vis : Visualization tools.
 
 '''
 
-__COPYRIGHT__ = 'Copyright 2020 Joseph Benjamin Nagel'
+__COPYRIGHT__ = 'Copyright 2020-2023 Joseph Benjamin Nagel'
 
 
 from . import analysis
@@ -26,6 +27,7 @@ from . import divergences
 from . import layers
 from . import reparametrization
 from . import variationalize
+from . import vis
 
 
 from .analysis import anomaly_score, calibration_metrics
@@ -33,4 +35,6 @@ from .analysis import anomaly_score, calibration_metrics
 from .layers import VariationalLinear
 
 from .variationalize import VariationalClassification
+
+from .vis import plot_data_2d, plot_function_2d
 
