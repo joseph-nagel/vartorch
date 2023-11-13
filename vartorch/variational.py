@@ -55,7 +55,7 @@ class VariationalClassification():
     Some high-level methods automatically use the appropriate mode, for instance,
     'train_epoch' or 'test_loss' have to use sampling for the loss simulation.
     Another example is 'predict_proba' that computes posterior predictive probabilities
-    with sampling (num_samples>1) and mean weight probabilites without (num_samples=1).
+    with sampling (num_samples>1) and mean weight probabilities without (num_samples=1).
     The same behavior is found in 'predict_top' and 'test_acc', too.
 
     '''

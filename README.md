@@ -1,6 +1,9 @@
 # Variational Bayesian inference with PyTorch
 
-<img src="assets/bnn.png" alt="Bayesian neural network" width="50%" height="50%">
+<p float="left">
+  <img src="assets/bnn.png" alt="Bayesian neural network" height="300" align="left">
+  <img src="assets/uncertainty.svg" alt="Posterior uncertainty" height="300" align="center">
+</p>
 
 This project establishes a toolbox for variational Bayesian inference with PyTorch.
 For the moment, the focus is on Bayesian neural networks for classification problems.

@@ -90,7 +90,7 @@ def plot_function_2d(function,
     )
 
     if colorbar:
-        plt.colorbar(im1)
+        plt.colorbar(im1, ax=ax)
 
     plt.clabel(im2, fmt='%1.2f')
 
