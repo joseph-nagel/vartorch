@@ -8,6 +8,7 @@ for stochastic variational inference in classification problems.
 It turns models with variational and other layers into Bayesian classifiers.
 While the likelihood determines whether the problem is binary or multi-class,
 the model layers determine the unknown weights and their treatment.
+
 A posterior over the weights of the variational layers is computed by
 maximizing the ELBO w.r.t. the parameters of the variational distribution.
 Other non-Bayesian unknown parameters of the prior and the likelihood,
@@ -30,6 +31,7 @@ class VariationalClassification():
     This class supports stochastic variational inference by equipping classifier
     models including variational and normal layers with an MC simulator of the ELBO.
     This involves an expectation over the log-likelihood and a KL divergence term.
+
     The likelihood is defined based on a categorical or a Bernoulli distribution.
     The KL divergence is automatically accumulated from the involved layers.
     While the likelihood term is estimated by means of MC sampling,

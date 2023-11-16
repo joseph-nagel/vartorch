@@ -7,7 +7,7 @@ AUTHOR = 'Joseph Nagel'
 EMAIL = 'JosephBNagel@gmail.com'
 URL = 'https://github.com/joseph-nagel/vartorch'
 LICENSE = 'MIT'
-DESCRIPTION = 'Variational Bayesian inference with PyTorch'
+DESCRIPTION = 'Variational inference for Bayesian neural nets with PyTorch'
 
 
 try:

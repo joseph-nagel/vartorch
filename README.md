@@ -1,13 +1,14 @@
-# Variational Bayesian inference with PyTorch
+# Variational inference for Bayesian neural nets
 
 <p float="left">
   <img src="assets/bnn.png" alt="Bayesian neural network" height="300" align="left">
   <img src="assets/uncertainty.svg" alt="Posterior uncertainty" height="300" align="center">
 </p>
 
-This project establishes a toolbox for variational Bayesian inference with PyTorch.
-For the moment, the focus is on Bayesian neural networks for classification problems.
-Multivariate Gaussians with diagonal covariances are used as variational distributions.
-More general posterior approximations will be integrated in the future, though.
-Demonstrations are provided on the basis of half-moons data and the MNIST dataset.
+This project implements variational inference for Bayesian neural networks with PyTorch.
+While the computational expense is expected to increase in comparison to classical model training,
+the approach enables a means of uncertainty quantification in deep learning.
+Only classification problems can be addressed at this point.
+Another limitation is that the variational distribution, which acts as a parametric posterior approximation,
+is restricted to a multivariate Gaussian with a diagonal covariance matrix.
 

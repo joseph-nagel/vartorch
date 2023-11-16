@@ -1,11 +1,13 @@
 '''
-Variational Bayesian inference with PyTorch.
+Variational inference for Bayesian neural nets with PyTorch.
 
 Summary
 -------
 This package enables stochastic variational inference with PyTorch.
-For the moment, prior distributions and variational posteriors
-are multivariate Gaussians with diagonal covariance matrices.
+It allows for training and employing Bayesian neural networks.
+At the moment, the scope is limited to classification problems only.
+Prior distributions and variational posteriors are represented as
+multivariate Gaussians with diagonal covariance matrices.
 More general extensions are envisaged for the future.
 
 Modules
