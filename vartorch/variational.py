@@ -261,7 +261,7 @@ class VariationalClassification():
             loss.backward()
             self.optimizer.step()
 
-            batch_loss = loss.data.item()
+            batch_loss = loss.detach().cpu().item()
             batch_losses.append(batch_loss)
 
             if len(batch_losses) < 3:
@@ -305,7 +305,7 @@ class VariationalClassification():
                     kl_weight=X_batch.shape[0] / len(test_loader.dataset)
                 )
 
-                test_loss += loss.data.item()
+                test_loss += loss.detach().cpu().item()
 
         # test only one batch
         else:
@@ -320,7 +320,7 @@ class VariationalClassification():
                 ll_weight=len(test_loader.dataset) / X_batch.shape[0]
             )
 
-            test_loss = loss.data.item()
+            test_loss = loss.detach().cpu().item()
 
         return test_loss
 
@@ -351,7 +351,7 @@ class VariationalClassification():
                 top_class, top_prob = self.predict_top(X_batch, num_samples, threshold)
 
                 is_correct = top_class.squeeze().int() == y_batch.squeeze().int()
-                num_correct += torch.sum(is_correct).data.item()
+                num_correct += torch.sum(is_correct).detach().cpu().item()
 
         test_acc = num_correct / num_total
 

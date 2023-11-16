@@ -139,12 +139,15 @@ def calibration_metrics(model,
     # confidence bins and accuracies
     conf_edges = np.linspace(0, 1, num_bins+1)
     binned_conf = (conf_edges[1:] + conf_edges[:-1]) / 2
+
     binned_acc = np.zeros(num_bins)
     binned_num_samples = np.zeros(num_bins, dtype='int')
     for idx in range(num_bins):
         lower = conf_edges[idx]
         upper = conf_edges[idx+1]
+
         ids = np.where(np.logical_and(top_prob>=lower, top_prob<upper))[0]
+
         binned_num_samples[idx] = len(ids)
         binned_acc[idx] = (np.sum(labels[ids] == top_class[ids])) \
                           / binned_num_samples[idx] \
@@ -244,6 +247,6 @@ def _extract_predict(model,
 
 def _make_array(tensor):
     '''Transform tensor into array.'''
-    array = tensor.data.cpu().numpy()
+    array = tensor.detach().cpu().numpy()
     return array
 
