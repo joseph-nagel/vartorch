@@ -19,8 +19,6 @@ such as the weights of non-variational layers, can also be learned this way.
 import torch
 import torch.distributions as dist
 
-from torchutils.tools import moving_average
-
 
 class VariationalClassification():
     '''
@@ -265,9 +263,9 @@ class VariationalClassification():
             batch_losses.append(batch_loss)
 
             if len(batch_losses) < 3:
-                running_loss = batch_loss
+                running_loss = batch_loss # just take the batch loss
             else:
-                running_loss = moving_average(batch_losses, window=3, mode='last')
+                running_loss = sum(batch_losses[-3:]) / 3 # compute moving average
 
             if log_interval is not None:
                 if (batch_idx+1) % log_interval == 0 or (batch_idx+1) == len(self.train_loader):

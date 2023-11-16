@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vartorch"
+version = "0.0.1"
+description = "Variational inference for Bayesian neural nets with PyTorch"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Joseph Nagel", email = "JosephBNagel@gmail.com"}
+]
+keywords = ["variational inference", "Bayesian neural network"]
+dependencies = [
+    "numpy",
+    "torch"
+]
+
+[project.optional-dependencies]
+interactive = [
+    "matplotlib",
+    "notebook"
+]
+
+[project.urls]
+source = "https://github.com/joseph-nagel/vartorch"
+

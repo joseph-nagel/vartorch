@@ -12,3 +12,10 @@ Only classification problems can be addressed at this point.
 Another limitation is that the variational distribution, which acts as a parametric posterior approximation,
 is restricted to a multivariate Gaussian with a diagonal covariance matrix.
 
+
+## Installation
+
+```
+pip install -e .
+```
+
