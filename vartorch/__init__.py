@@ -14,9 +14,10 @@ Modules
 data : Data tools.
 kldiv : Kullback-Leibler divergence.
 layers : Variational layers.
-model : Variational mdoels.
 metrics : Analysis tools.
+model : Model blocks.
 reparam : Reparametrization issues.
+var : Variational models.
 vis : Visualization tools.
 
 '''
@@ -57,19 +58,17 @@ from .layers import (
     make_conv
 )
 
-from .model import (
-    VarClassifier,
-    DenseBlock,
-    DenseVarClassifier
-)
-
 from .metrics import anomaly_score, calibration_metrics
+
+from .model import DenseBlock
 
 from .reparam import (
     reparametrize,
     sigma_from_log,
     sigma_from_rho
 )
+
+from .var import VarClassifier, DenseVarClassifier
 
 from .vis import plot_data_2d, plot_function_2d
 

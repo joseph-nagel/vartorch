@@ -348,3 +348,8 @@ class VarClassifier(LightningModule):
         self.log('test_loss', loss.item()) # Lightning automatically averages scalars over batches for testing
         return loss
 
+    # TODO: enable LR scheduling
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        return optimizer
+
