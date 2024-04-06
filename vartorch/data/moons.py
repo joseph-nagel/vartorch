@@ -101,18 +101,32 @@ class MoonsDataModule(LightningDataModule):
         )
 
         # transform to tensor
-        x = torch.tensor(x, dtype=torch.float32)
-        y = torch.tensor(y, dtype=torch.int64)
+        self.x = torch.tensor(x, dtype=torch.float32)
+        self.y = torch.tensor(y, dtype=torch.int64)
 
-        # split data
-        self.x_train = x[:self.num_train]
-        self.y_train = y[:self.num_train]
+    @property
+    def x_train(self):
+        return self.x[:self.num_train]
 
-        self.x_val = x[self.num_train:self.num_train+self.num_val]
-        self.y_val = y[self.num_train:self.num_train+self.num_val]
+    @property
+    def y_train(self):
+        return self.y[:self.num_train]
 
-        self.x_test = x[self.num_train+self.num_val:]
-        self.y_test = y[self.num_train+self.num_val:]
+    @property
+    def x_val(self):
+        return self.x[self.num_train:self.num_train+self.num_val]
+
+    @property
+    def y_val(self):
+        return self.y[self.num_train:self.num_train+self.num_val]
+
+    @property
+    def x_test(self):
+        return self.x[self.num_train+self.num_val:]
+
+    @property
+    def y_test(self):
+        return self.y[self.num_train+self.num_val:]
 
     def setup(self, stage):
         '''Set up train/test/val. datasets.'''
