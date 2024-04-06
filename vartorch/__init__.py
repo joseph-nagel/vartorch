@@ -55,7 +55,9 @@ from .layers import (
     make_block,
     make_dropout,
     make_dense,
-    make_conv
+    make_conv,
+    SingleConv,
+    DoubleConv
 )
 
 from .metrics import anomaly_score, calibration_metrics
@@ -68,7 +70,11 @@ from .reparam import (
     sigma_from_rho
 )
 
-from .var import VarClassifier, DenseVarClassifier
+from .var import (
+    VarClassifier,
+    ConvVarClassifier,
+    DenseVarClassifier
+)
 
 from .vis import plot_data_2d, plot_function_2d
 

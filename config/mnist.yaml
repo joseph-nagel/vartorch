@@ -1,0 +1,57 @@
+seed_everything: null
+
+ckpt_path: null
+
+data:
+  class_path: "vartorch.MNISTDataModule"
+  init_args:
+    data_dir: "run/data"
+    mean: 0.5
+    std: 0.5
+    batch_size: 32
+    num_workers: 0
+
+model:
+  class_path: "vartorch.ConvVarClassifier"
+  init_args:
+    num_channels: [1, 16, 32]
+    num_features: [1568, 10]
+    kernel_size: 3
+    pooling: 2
+    batchnorm: false
+    activation: "leaky_relu"
+    last_activation: null
+    drop_rate: null
+    pool_last: true
+    double_conv: true
+    weight_std: 1.0
+    bias_std: 1.0
+    param_mode: "log"
+    num_samples: 1
+    likelihood_type: "Categorical"
+    lr: 0.0001
+
+trainer:
+  accelerator: "cpu"
+  max_epochs: 100
+  log_every_n_steps: 100
+  logger:
+    class_path: "lightning.pytorch.loggers.TensorBoardLogger"
+    init_args:
+      save_dir: "run/"
+      name: "mnist"
+      version: null
+  callbacks:
+    - class_path: "lightning.pytorch.callbacks.ModelCheckpoint"
+      init_args:
+        filename: "best"
+        monitor: "val_loss"
+        mode: "min"
+        save_top_k: 1
+    - class_path: "lightning.pytorch.callbacks.ModelCheckpoint"
+      init_args:
+        filename: "{epoch}"
+        save_top_k: -1
+        every_n_epochs: 2
+        save_last: true
+

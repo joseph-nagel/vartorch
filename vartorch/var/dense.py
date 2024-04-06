@@ -17,7 +17,7 @@ class DenseVarClassifier(VarClassifier):
     activation : None or str
         Nonlinearity type.
     last_activation : None or str
-        Final activation.
+        Nonlinearity of the final layer.
     drop_rate : float
         Dropout probability.
     weight_std : float
@@ -61,6 +61,7 @@ class DenseVarClassifier(VarClassifier):
             batchnorm=batchnorm,
             activation=activation,
             last_activation=last_activation,
+            normalize_last=False,
             drop_rate=drop_rate,
             variational=True,
             var_opts=var_opts

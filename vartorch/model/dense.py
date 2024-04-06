@@ -13,6 +13,7 @@ class DenseBlock(nn.Sequential):
                  batchnorm=False,
                  activation='leaky_relu',
                  last_activation=None,
+                 normalize_last=False,
                  drop_rate=None,
                  variational=False,
                  var_opts={}):
@@ -35,7 +36,7 @@ class DenseBlock(nn.Sequential):
             dense = make_dense(
                 in_features,
                 out_features,
-                batchnorm=batchnorm,
+                batchnorm=batchnorm if is_not_last else (batchnorm and normalize_last),
                 activation=activation if is_not_last else last_activation,
                 drop_rate=drop_rate,
                 variational=variational,

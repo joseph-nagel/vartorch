@@ -54,6 +54,8 @@ from .utils import (
     make_block,
     make_dropout,
     make_dense,
-    make_conv
+    make_conv,
+    SingleConv,
+    DoubleConv
 )
 

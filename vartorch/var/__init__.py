@@ -17,14 +17,17 @@ such as the weights of non-variational layers, can also be learned this way.
 Modules
 -------
 base : Variational classifier.
-dense : Dense variational classifier
+conv : Conv. variational classifier.
+dense : Dense variational classifier.
 
 '''
 
-from . import base, dense
+from . import base, conv, dense
 
 
 from .base import VarClassifier
+
+from .conv import ConvVarClassifier
 
 from .dense import DenseVarClassifier
 

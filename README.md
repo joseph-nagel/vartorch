@@ -24,3 +24,13 @@ pip install -e .
 python scripts/main.py fit --config config/moons.yaml
 ```
 
+```
+python scripts/main.py fit --config config/mnist.yaml
+```
+
+## Notebooks
+
+- [Half moons example](notebooks/halfmoons.ipynb)
+
+- [MNIST example](notebooks/mnist.ipynb)
+
