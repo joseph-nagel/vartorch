@@ -14,10 +14,17 @@ maximizing the ELBO w.r.t. the parameters of the variational distribution.
 Other non-Bayesian unknown parameters of the prior and the likelihood,
 such as the weights of non-variational layers, can also be learned this way.
 
+Modules
+-------
+base : Variational classifier.
+dense : Dense variational classifier
+
 '''
 
-from . import base
+from . import base, dense
 
 
 from .base import VarClassifier
+
+from .dense import DenseBlock, DenseVarClassifier
 

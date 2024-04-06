@@ -1,4 +1,4 @@
-'''Variational classification.'''
+'''Variational classifier.'''
 
 import torch
 import torch.distributions as dist
@@ -205,7 +205,7 @@ class VarClassifier(LightningModule):
     def kl(self):
         '''Accumulate KL divergence from model layers.'''
 
-        kl = 0.0 # kl = torch.tensor(0.0, device=self.device)
+        kl = 0.0
 
         # accumulate KL div. from appropriate layers
         for layer in self.model.modules():
@@ -236,8 +236,8 @@ class VarClassifier(LightningModule):
              kl_weight=1.0):
         '''Simulate the ELBO by MC sampling.'''
 
-        ll = 0.0 # ll = torch.tensor(0.0, device=self.device)
-        kl = 0.0 # kl = torch.tensor(0.0, device=self.device)
+        ll = 0.0
+        kl = 0.0
 
         # loop over samples
         for _ in range(num_samples):
@@ -260,7 +260,7 @@ class VarClassifier(LightningModule):
              reweight_ll=True):
         '''Simulate the negative-ELBO loss.'''
 
-        # get weighting factor
+        # get weighting factors
         ll_weight = 1.0
         kl_weight = 1.0
 
@@ -271,7 +271,7 @@ class VarClassifier(LightningModule):
             if reweight_ll:
                 ll_weight = total_size / batch_size
 
-            # down-weight KLD so as to compensate when it is summed over multiple times (use when summing)
+            # down-weight KLD so as to compensate for when it is summed over multiple times (use when summing)
             else:
                 kl_weight = batch_size / total_size
 

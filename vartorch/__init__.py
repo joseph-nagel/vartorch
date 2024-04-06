@@ -49,10 +49,19 @@ from .layers import (
     VarLinear,
     VarLinearWithUncertainLogits,
     VarLinearWithLearnableTemperature,
-    Reparametrize
+    Reparametrize,
+    make_activation,
+    make_block,
+    make_dropout,
+    make_dense,
+    make_conv
 )
 
-from .model import VarClassifier
+from .model import (
+    VarClassifier,
+    DenseBlock,
+    DenseVarClassifier
+)
 
 from .metrics import anomaly_score, calibration_metrics
 
