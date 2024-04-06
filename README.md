@@ -30,7 +30,7 @@ python scripts/main.py fit --config config/mnist.yaml
 
 ## Notebooks
 
-- [Half moons example](notebooks/halfmoons.ipynb)
+- [Half-moons example](notebooks/moons.ipynb)
 
 - [MNIST example](notebooks/mnist.ipynb)
 
