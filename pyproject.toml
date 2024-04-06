@@ -18,7 +18,8 @@ authors = [
 keywords = ["variational inference", "Bayesian neural network"]
 dependencies = [
     "numpy",
-    "torch"
+    "torch",
+    "lightning"
 ]
 
 [project.optional-dependencies]

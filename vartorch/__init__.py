@@ -12,6 +12,7 @@ More general extensions are envisaged for the future.
 
 Modules
 -------
+data : Data tools.
 analysis : Analysis tools.
 divergence : Kullback-Leibler divergence.
 layers : Variational layers.
@@ -21,16 +22,25 @@ vis : Visualization tools.
 
 '''
 
-__COPYRIGHT__ = 'Copyright 2020-2023 Joseph Benjamin Nagel'
+__COPYRIGHT__ = 'Copyright 2020-2024 Joseph Benjamin Nagel'
 
 
-from . import analysis
-from . import divergence
-from . import layers
-from . import reparam
-from . import variational
-from . import vis
+from . import (
+    data,
+    analysis,
+    divergence,
+    layers,
+    reparam,
+    variational,
+    vis
+)
 
+
+from .data import (
+    make_half_moons,
+    MoonsDataModule,
+    MNISTDataModule
+)
 
 from .analysis import anomaly_score, calibration_metrics
 
