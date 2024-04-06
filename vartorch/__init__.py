@@ -8,30 +8,26 @@ It allows for training and employing Bayesian neural networks.
 At the moment, the scope is limited to classification problems only.
 Prior distributions and variational posteriors are represented as
 multivariate Gaussians with diagonal covariance matrices.
-More general extensions are envisaged for the future.
 
 Modules
 -------
 data : Data tools.
-analysis : Analysis tools.
-divergence : Kullback-Leibler divergence.
+kldiv : Kullback-Leibler divergence.
 layers : Variational layers.
+model : Variational mdoels.
+metrics : Analysis tools.
 reparam : Reparametrization issues.
-variational : Model variationalization.
 vis : Visualization tools.
 
 '''
 
-__COPYRIGHT__ = 'Copyright 2020-2024 Joseph Benjamin Nagel'
-
-
 from . import (
     data,
-    analysis,
-    divergence,
+    kldiv,
     layers,
+    model,
+    metrics,
     reparam,
-    variational,
     vis
 )
 
@@ -42,11 +38,29 @@ from .data import (
     MNISTDataModule
 )
 
-from .analysis import anomaly_score, calibration_metrics
+from .kldiv import (
+    kl_div_dist,
+    kl_div_analytical,
+    kl_div_mc
+)
 
-from .layers import VariationalLinear
+from .layers import (
+    VarLayer,
+    VarLinear,
+    VarLinearWithUncertainLogits,
+    VarLinearWithLearnableTemperature,
+    Reparametrize
+)
 
-from .variational import VariationalClassification
+from .model import VarClassifier
+
+from .metrics import anomaly_score, calibration_metrics
+
+from .reparam import (
+    reparametrize,
+    sigma_from_log,
+    sigma_from_rho
+)
 
 from .vis import plot_data_2d, plot_function_2d
 

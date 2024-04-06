@@ -1,93 +1,15 @@
-'''
-Variational layers.
-
-Summary
--------
-A base class for variational layers is defined in 'VariationalLayer'.
-This manages the main settings regarding the probabilistic weights.
-In particular, it comes with a parametrization mode and a sampling switch.
-
-The child class 'VariationalLinear' establishes a linear layer suitable to variational inference.
-One can specify independent Gaussian priors for the weights and biases.
-A Gaussian mean field approximation is used as the variational posterior.
-Its means and standard deviations (or a transform of them) are the learnable parameters.
-When in sampling mode, the weights are randomly drawn from the posterior
-Otherwise, the weights are set to their posterior means.
-The KL divergence is computed during the forward pass when sampling is turned on.
-
-The extensions 'VariationalLinearWithUncertainLogits' and 'VariationalLinearWithLearnableTemperature'
-allow for a finer modeling and control of the encountered uncertainties.
-The former represents the logits as Gaussian variables with learnable means and standard deviations.
-The latter performs an input-dependent temperature scaling on the logits.
-
-'Reparametrize' implements the reparametrization trick for the MC estimation of the ELBO loss.
-It can be used as component for building advanced layers.
-
-'''
+'''Variational linear layers.'''
 
 import torch
 import torch.nn as nn
 
-from .divergence import kl_div_pytorch
-
-from .reparam import (
-    reparametrize,
-    sigma_from_log,
-    sigma_from_rho
-)
+from ..kldiv import kl_div_dist
+from ..reparam import reparametrize
+from .base import VarLayer
+from .reparam import Reparametrize
 
 
-class VariationalLayer(nn.Module):
-    '''
-    Variational layer base class.
-
-    Summary
-    -------
-    Variational layers can inherit from this parent class.
-    It manages how standard deviations of the variational distribution are parametrized
-    and allows for turning random weight sampling on and off for the predictions.
-
-    Parameters
-    ----------
-    param_mode : {'log', 'rho'}
-        Determines how the non-negative standard deviation
-        is represented in terms of a real-valued parameter.
-
-    '''
-
-    def __init__(self, param_mode='log'):
-        super().__init__()
-
-        self.parametrization = param_mode
-        self.sampling = True
-
-    @property
-    def parametrization(self):
-        '''Get parametrization mode.'''
-        return self._parametrization
-
-    @parametrization.setter
-    def parametrization(self, param_mode):
-        '''Set parametrization mode.'''
-        self._parametrization = param_mode
-
-        if param_mode == 'log':
-            self.sigma = sigma_from_log
-        elif param_mode == 'rho':
-            self.sigma = sigma_from_rho
-
-    @property
-    def sampling(self):
-        '''Get sampling mode.'''
-        return self._sampling
-
-    @sampling.setter
-    def sampling(self, sample_mode):
-        '''Set sampling mode.'''
-        self._sampling = sample_mode
-
-
-class VariationalLinear(VariationalLayer):
+class VarLinear(VarLayer):
     '''
     Variational linear layer.
 
@@ -116,8 +38,8 @@ class VariationalLinear(VariationalLayer):
     def __init__(self,
                  in_features,
                  out_features,
-                 weight_std=1.,
-                 bias_std=1.,
+                 weight_std=1.0,
+                 bias_std=1.0,
                  param_mode='log'):
 
         super().__init__(param_mode)
@@ -139,12 +61,15 @@ class VariationalLinear(VariationalLayer):
         self.b_sigma_param = nn.Parameter(torch.randn(self.out_features))
 
     def forward(self, X):
+
         # sample from q
         if self.sampling:
             w_sigma = self.sigma(self.w_sigma_param)
             b_sigma = self.sigma(self.b_sigma_param)
+
             w = reparametrize(self.w_mu, w_sigma)
             b = reparametrize(self.b_mu, b_sigma)
+
         # return mean of q
         else:
             w = self.w_mu
@@ -154,8 +79,8 @@ class VariationalLinear(VariationalLayer):
 
         # compute KL divergence
         if self.sampling:
-            self.kl_acc = kl_div_pytorch(self.w_mu, w_sigma, self.weight_std) \
-                        + kl_div_pytorch(self.b_mu, b_sigma, self.bias_std)
+            self.kl_acc = kl_div_dist(self.w_mu, w_sigma, self.weight_std) \
+                        + kl_div_dist(self.b_mu, b_sigma, self.bias_std)
         # do not compute KL divergence
         else:
             self.kl_acc = torch.tensor(0.0, device=y.device)
@@ -163,7 +88,7 @@ class VariationalLinear(VariationalLayer):
         return y
 
 
-class VariationalLinearWithUncertainLogits(VariationalLayer):
+class VarLinearWithUncertainLogits(VarLayer):
     '''
     Variational linear layer with uncertain logits.
 
@@ -175,20 +100,20 @@ class VariationalLinearWithUncertainLogits(VariationalLayer):
 
     Parameters
     ----------
-    See documentation of 'VariationalLinear'.
+    See documentation of 'VarLinear'.
 
     '''
 
     def __init__(self,
                  in_features,
                  out_features,
-                 weight_std=1.,
-                 bias_std=1.,
+                 weight_std=1.0,
+                 bias_std=1.0,
                  param_mode='log'):
 
         super().__init__(param_mode)
 
-        self.logits_mu = VariationalLinear(
+        self.logits_mu = VarLinear(
             in_features=in_features,
             out_features=out_features,
             weight_std=weight_std,
@@ -196,7 +121,8 @@ class VariationalLinearWithUncertainLogits(VariationalLayer):
             param_mode=param_mode
 
         )
-        self.logits_sigma_param = VariationalLinear(
+
+        self.logits_sigma_param = VarLinear(
             in_features=in_features,
             out_features=out_features,
             weight_std=weight_std,
@@ -221,12 +147,12 @@ class VariationalLinearWithUncertainLogits(VariationalLayer):
     def forward(self, X):
         mu = self.logits_mu(X)
         sigma_param = self.logits_sigma_param(X)
-        sigma = self.sigm(sigma_param)
+        sigma = self.sigma(sigma_param)
         y = self.reparametrize(mu, sigma)
         return y
 
 
-class VariationalLinearWithLearnableTemperature(VariationalLayer):
+class VarLinearWithLearnableTemperature(VarLayer):
     '''
     Variational linear layer with learnable temperature.
 
@@ -238,20 +164,20 @@ class VariationalLinearWithLearnableTemperature(VariationalLayer):
 
     Parameters
     ----------
-    See documentation of 'VariationalLinear'.
+    See documentation of 'VarLinear'.
 
     '''
 
     def __init__(self,
                  in_features,
                  out_features,
-                 weight_std=1.,
-                 bias_std=1.,
+                 weight_std=1.0,
+                 bias_std=1.0,
                  param_mode='log'):
 
         super().__init__(param_mode)
 
-        self.logits = VariationalLinear(
+        self.logits = VarLinear(
             in_features=in_features,
             out_features=out_features,
             weight_std=weight_std,
@@ -259,7 +185,7 @@ class VariationalLinearWithLearnableTemperature(VariationalLayer):
             param_mode=param_mode
         )
 
-        self.logtemp = VariationalLinear(
+        self.logtemp = VarLinear(
             in_features=in_features,
             out_features=1,
             weight_std=weight_std,
@@ -273,19 +199,5 @@ class VariationalLinearWithLearnableTemperature(VariationalLayer):
         temp = torch.exp(logtemp)
         # temp = 1 + torch.exp(logtemp)
         y = logits / temp
-        return y
-
-
-class Reparametrize(VariationalLayer):
-    '''Reparametrization trick.'''
-
-    def forward(self, mu, sigma_param):
-        # sample around the mean
-        if self.sampling:
-            sigma = self.sigma(sigma_param)
-            y = reparametrize(mu, sigma)
-        # just return the mean
-        else:
-            y = mu
         return y
 
