@@ -18,3 +18,9 @@ is restricted to a multivariate Gaussian with a diagonal covariance matrix.
 pip install -e .
 ```
 
+## Training
+
+```
+python scripts/main.py fit --config config/moons.yaml
+```
+

@@ -1,0 +1,60 @@
+seed_everything: null
+
+ckpt_path: null
+
+data:
+  class_path: "vartorch.MoonsDataModule"
+  init_args:
+    num_train: 500
+    num_val: 100
+    num_test: 100
+    noise_level: 0.15
+    offsets: [0.15, -0.15]
+    batch_size: 32
+    num_workers: 0
+
+model:
+  class_path: "vartorch.DenseVarClassifier"
+  init_args:
+    num_features: [2, 16, 32, 1]
+    batchnorm: false
+    activation: "leaky_relu"
+    last_activation: null
+    drop_rate: null
+    weight_std: 1.0
+    bias_std: 1.0
+    param_mode: 'log'
+    num_samples: 1
+    likelihood_type: "Bernoulli"
+    lr: 0.0001
+
+trainer:
+  accelerator: "cpu"
+  max_epochs: 20
+  log_every_n_steps: 100
+  logger:
+    class_path: "lightning.pytorch.loggers.TensorBoardLogger"
+    init_args:
+      save_dir: "run/"
+      name: "moons"
+      version: null
+  callbacks:
+    - class_path: "lightning.pytorch.callbacks.ModelCheckpoint"
+      init_args:
+        filename: "best"
+        monitor: "val_loss"
+        mode: "min"
+        save_top_k: 1
+    - class_path: "lightning.pytorch.callbacks.ModelCheckpoint"
+      init_args:
+        filename: "{epoch}"
+        save_top_k: -1
+        every_n_epochs: 2
+        save_last: true
+    # - class_path: "lightning.pytorch.callbacks.ModelCheckpoint"
+    #   init_args:
+    #     filename: "{step}"
+    #     save_top_k: -1
+    #     every_n_train_steps: 100
+    #     save_last: false
+
