@@ -131,12 +131,9 @@ class MoonsDataModule(LightningDataModule):
     def setup(self, stage):
         '''Set up train/test/val. datasets.'''
 
-        # create train dataset
-        if stage == 'fit':
+        # create train/val. datasets
+        if stage in ('fit', 'validate'):
             self.train_set = TensorDataset(self.x_train, self.y_train)
-
-        # create val. dataset
-        elif stage == 'validate':
             self.val_set = TensorDataset(self.x_val, self.y_val)
 
         # create test dataset
