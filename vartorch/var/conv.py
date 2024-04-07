@@ -78,7 +78,10 @@ class ConvVarClassifier(VarClassifier):
                 ValueError('Bernoulli likelihood requires a single output')
 
         elif likelihood_type == 'Categorical':
-            num_classes = num_features[-1]
+            if num_features[-1] > 1:
+                num_classes = num_features[-1]
+            else:
+                ValueError('Categorical likelihood requires multiple outputs')
 
         else:
             raise ValueError(f'Unknown likelihood type: {likelihood_type}')

@@ -287,7 +287,7 @@ class VarClassifier(LightningModule):
             ll = ll + ll_sample
             kl = kl + self.kl() # the KL terms can be aggregated after the LL computation
 
-        # avergage over samples
+        # average over samples
         ll = ll / num_samples
         kl = kl / num_samples
 
