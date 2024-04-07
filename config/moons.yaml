@@ -23,7 +23,7 @@ model:
     drop_rate: null
     weight_std: 1.0
     bias_std: 1.0
-    param_mode: 'rho'
+    param_mode: "rho"
     num_samples: 1
     likelihood_type: "Bernoulli"
     lr: 0.01
@@ -51,4 +51,10 @@ trainer:
         save_top_k: -1
         every_n_epochs: 10
         save_last: true
+    # - class_path: "lightning.pytorch.callbacks.ModelCheckpoint"
+    #   init_args:
+    #     filename: "{step}"
+    #     save_top_k: -1
+    #     every_n_train_steps: 100
+    #     save_last: false
 

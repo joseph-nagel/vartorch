@@ -8,10 +8,12 @@ from lightning import LightningDataModule
 
 class MNISTDataModule(LightningDataModule):
     '''
-    DataModule for the MNIST dataset.
+    DataModule for MNIST-like datasets.
 
     Parameters
     ----------
+    data_set : str
+        Determines the MNIST-like dataset.
     data_dir : str
         Directory for storing the data.
     mean : float
@@ -26,13 +28,24 @@ class MNISTDataModule(LightningDataModule):
     '''
 
     def __init__(self,
-                 data_dir,
+                 data_set='mnist',
+                 data_dir='.',
                  mean=None,
                  std=None,
                  batch_size=32,
                  num_workers=0):
 
         super().__init__()
+
+        # set dataset
+        if data_set == 'mnist':
+            self.data_class = datasets.MNIST
+        elif data_set in ('fashion_mnist', 'fmnist'):
+            self.data_class = datasets.FashionMNIST
+        elif data_set in ('kuzushiji_mnist', 'kmnist'):
+            self.data_class = datasets.KMNIST
+        else:
+            raise ValueError(f'Invalid dataset: {data_set}')
 
         # set data location
         self.data_dir = data_dir
@@ -61,13 +74,13 @@ class MNISTDataModule(LightningDataModule):
     def prepare_data(self):
         '''Download data.'''
 
-        train_set = datasets.MNIST(
+        train_set = self.data_class(
             self.data_dir,
             train=True,
             download=True
         )
 
-        test_set = datasets.MNIST(
+        test_set = self.data_class(
             self.data_dir,
             train=False,
             download=True
@@ -78,7 +91,7 @@ class MNISTDataModule(LightningDataModule):
 
         # create train/val. datasets
         if stage in ('fit', 'validate'):
-            train_set = datasets.MNIST(
+            train_set = self.data_class(
                 self.data_dir,
                 train=True,
                 transform=self.train_transform
@@ -92,7 +105,7 @@ class MNISTDataModule(LightningDataModule):
 
         # create test dataset
         elif stage == 'test':
-            self.test_set = datasets.MNIST(
+            self.test_set = self.data_class(
                 self.data_dir,
                 train=False,
                 transform=self.test_transform

@@ -76,5 +76,11 @@ from .var import (
     DenseVarClassifier
 )
 
-from .vis import plot_data_2d, plot_function_2d
+from .vis import (
+    plot_point_predictions,
+    plot_post_predictions,
+    plot_entropy_histograms,
+    plot_data_2d,
+    plot_function_2d
+)
 

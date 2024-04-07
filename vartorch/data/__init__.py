@@ -4,7 +4,7 @@ Datamodules.
 Modules
 -------
 mnist : MNIST datamodule.
-moons : Half moons datamodule.
+moons : Half-moons datamodule.
 
 '''
 

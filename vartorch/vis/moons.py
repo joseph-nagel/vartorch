@@ -1,7 +1,7 @@
-'''Visualization tools.'''
+'''For the half-moons example.'''
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def plot_data_2d(X,
