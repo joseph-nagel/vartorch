@@ -3,6 +3,7 @@
 import torch
 import torch.distributions as dist
 from lightning.pytorch import LightningModule
+from torchmetrics.classification import Accuracy
 
 
 class VarClassifier(LightningModule):
@@ -42,6 +43,8 @@ class VarClassifier(LightningModule):
         Number of MC samples to simulate the ELBO.
     likelihood_type : {'Bernoulli', 'Categorical'}
         Likelihood function type.
+    num_classes : int
+        Number of classes.
     lr : float
         Initial optimizer learning rate.
 
@@ -51,6 +54,7 @@ class VarClassifier(LightningModule):
                  model,
                  num_samples=1,
                  likelihood_type='Categorical',
+                 num_classes=None,
                  lr=1e-04):
 
         super().__init__()
@@ -78,6 +82,20 @@ class VarClassifier(LightningModule):
             ignore='model',
             logger=True
         )
+
+        # create accuracy metrics
+        if self.likelihood_type == 'Bernoulli':
+            self.train_acc = Accuracy(task='binary')
+            self.val_acc = Accuracy(task='binary')
+            self.test_acc = Accuracy(task='binary')
+
+        elif num_classes is not None:
+            if num_classes < 2:
+                raise ValueError('Number of classes should be at least two')
+
+            self.train_acc = Accuracy(task='multiclass', num_classes=num_classes)
+            self.val_acc = Accuracy(task='multiclass', num_classes=num_classes)
+            self.test_acc = Accuracy(task='multiclass', num_classes=num_classes)
 
     @property
     def sampling(self):
@@ -129,22 +147,40 @@ class VarClassifier(LightningModule):
 
     def forward(self, x):
         '''Run model.'''
-        y_logits = self.model(x)
-        return y_logits
+        logits = self.model(x)
+        return logits
 
     def predict(self, x, num_samples=1):
         '''Predict logits.'''
 
         # loop over samples
-        logits_list = []
+        logits_samples = []
         for _ in range(num_samples):
-            logits = self(x)
-            logits_list.append(logits)
+            logits_sample = self(x)
+            logits_samples.append(logits_sample)
 
         # stack samples
-        y_logits = torch.stack(logits_list, dim=-1).squeeze(dim=-1)
+        logits_samples = torch.stack(logits_samples, dim=-1).squeeze(dim=-1)
 
-        return y_logits
+        return logits_samples
+
+    def probs_from_logits(self, logits, average=True):
+        '''Compute (average) probabilities from (samples of) logits.'''
+
+        if logits.ndim not in (2, 3):
+            raise ValueError(f'Invalid input shape: {logits.shape}')
+
+        # calculate probabilities
+        if self.likelihood_type == 'Bernoulli':
+            probs = torch.sigmoid(logits)
+        else:
+            probs = torch.softmax(logits, dim=1)
+
+        # average over samples if needed
+        if average and (probs.ndim == 3):
+            probs = torch.mean(probs, dim=-1)
+
+        return probs
 
     def predict_proba(self, x, num_samples=1):
         '''Predict probabilities (mean weight or posterior predictive).'''
@@ -156,13 +192,10 @@ class VarClassifier(LightningModule):
             self.sample(False)
 
             # predict logits
-            y_logits = self.predict(x, num_samples=1)
+            logits = self.predict(x, num_samples=1)
 
             # calculate probabilities
-            if self.likelihood_type == 'Bernoulli':
-                y_probs = torch.sigmoid(y_logits)
-            else:
-                y_probs = torch.softmax(y_logits, dim=1)
+            probs = self.probs_from_logits(logits)
 
         # compute posterior predictive distribution
         else:
@@ -171,18 +204,12 @@ class VarClassifier(LightningModule):
             self.sample(True)
 
             # predict logits
-            sampled_logits = self.predict(x, num_samples=num_samples)
+            logits_samples = self.predict(x, num_samples=num_samples)
 
             # calculate probabilities
-            if self.likelihood_type == 'Bernoulli':
-                sampled_probs = torch.sigmoid(sampled_logits)
-            else:
-                sampled_probs = torch.softmax(sampled_logits, dim=1)
+            probs = self.probs_from_logits(logits_samples)
 
-            # average over samples
-            y_probs = torch.mean(sampled_probs, dim=-1)
-
-        return y_probs
+        return probs
 
     def predict_top(self,
                     x,
@@ -191,14 +218,14 @@ class VarClassifier(LightningModule):
         '''Predict top class and probability (mean weight or posterior predictive).'''
 
         # predict probabilities
-        y_probs = self.predict_proba(x, num_samples=num_samples)
+        probs = self.predict_proba(x, num_samples=num_samples)
 
         # get top class and its probability
         if self.likelihood_type == 'Bernoulli':
-            top_class = (y_probs >= threshold).int()
-            top_prob = torch.where(top_class==1, y_probs, 1 - y_probs)
+            top_class = (probs >= threshold).int()
+            top_prob = torch.where(top_class==1, probs, 1 - probs)
         else:
-            top_prob, top_class = torch.topk(y_probs, k=1, dim=1)
+            top_prob, top_class = torch.topk(probs, k=1, dim=1)
 
         return top_class, top_prob
 
@@ -214,35 +241,51 @@ class VarClassifier(LightningModule):
 
         return kl
 
-    def ll(self, x, y):
+    def ll(self, x, y, return_preds=False):
         '''Compute the log-likelihood.'''
 
         # predict logits
-        y_logits = self(x)
+        logits = self(x)
 
         # compute log-likelihood
         if self.likelihood_type == 'Bernoulli':
-            ll = dist.Bernoulli(logits=y_logits.squeeze()).log_prob(y.float()).sum()
+            ll = dist.Bernoulli(logits=logits.squeeze()).log_prob(y.float()).sum()
         else:
-            ll = dist.Categorical(logits=y_logits).log_prob(y).sum()
+            ll = dist.Categorical(logits=logits).log_prob(y).sum()
 
-        return ll
+        if return_preds:
+            return ll, logits
+        else:
+            return ll
 
     def elbo(self,
              x,
              y,
              num_samples=1,
              ll_weight=1.0,
-             kl_weight=1.0):
+             kl_weight=1.0,
+             return_preds=False):
         '''Simulate the ELBO by MC sampling.'''
 
         ll = 0.0
         kl = 0.0
 
+        if return_preds:
+            logits_samples = []
+
         # loop over samples
         for _ in range(num_samples):
-            ll = ll + self.ll(x, y)
-            kl = kl + self.kl()
+
+            out = self.ll(x, y, return_preds=return_preds) # during the LL computation also the KL terms are calculated
+
+            if return_preds:
+                ll_sample, logits_sample = out
+                logits_samples.append(logits_sample)
+            else:
+                ll_sample = out
+
+            ll = ll + ll_sample
+            kl = kl + self.kl() # the KL terms can be aggregated after the LL computation
 
         # avergage over samples
         ll = ll / num_samples
@@ -250,14 +293,20 @@ class VarClassifier(LightningModule):
 
         elbo = ll * ll_weight - kl * kl_weight
 
-        return elbo
+        if return_preds:
+            logits_samples = torch.stack(logits_samples, dim=-1).squeeze(dim=-1)
+            probs = self.probs_from_logits(logits_samples)
+            return elbo, probs
+        else:
+            return elbo
 
     def loss(self,
              x,
              y,
              num_samples=1,
              total_size=None,
-             reweight_ll=True):
+             reweight_ll=True,
+             return_preds=False):
         '''Simulate the negative-ELBO loss.'''
 
         # get weighting factors
@@ -276,18 +325,27 @@ class VarClassifier(LightningModule):
                 kl_weight = batch_size / total_size
 
         # compute the ELBO
-        elbo = self.elbo(
+        out = self.elbo(
             x,
             y,
             num_samples=num_samples,
             ll_weight=ll_weight,
-            kl_weight=kl_weight
+            kl_weight=kl_weight,
+            return_preds=return_preds
         )
+
+        if return_preds:
+            elbo, probs = out
+        else:
+            elbo = out
 
         # get the loss (negative ELBO)
         loss = -elbo
 
-        return loss
+        if return_preds:
+            return loss, probs
+        else:
+            return loss
 
     @staticmethod
     def _get_batch(batch):
@@ -309,43 +367,55 @@ class VarClassifier(LightningModule):
     def training_step(self, batch, batch_idx):
         x_batch, y_batch = self._get_batch(batch)
 
-        loss = self.loss(
+        loss, probs = self.loss(
             x_batch,
             y_batch,
             num_samples=self.num_samples,
             total_size=len(self.trainer.train_dataloader.dataset),
-            reweight_ll=True # up-weight LL so as to estimate the full dataset loss (batches can be better compared)
+            reweight_ll=True, # up-weight LL so as to estimate the full dataset loss (batches can be better compared)
+            return_preds=True
         )
 
+        _ = self.train_acc(probs.squeeze(), y_batch)
+
         self.log('train_loss', loss.item()) # Lightning logs batch-wise scalars during training per default
+        self.log('train_acc', self.train_acc) # the same applies to torchmetrics.Metric objects
         return loss
 
     def validation_step(self, batch, batch_idx):
         x_batch, y_batch = self._get_batch(batch)
 
-        loss = self.loss(
+        loss, probs = self.loss(
             x_batch,
             y_batch,
             num_samples=self.num_samples,
             total_size=len(self.trainer.val_dataloaders.dataset),
-            reweight_ll=True # up-weight LL so as to estimate the full dataset loss (can be averaged)
+            reweight_ll=True, # up-weight LL so as to estimate the full dataset loss (can be averaged)
+            return_preds=True
         )
 
+        _ = self.val_acc(probs.squeeze(), y_batch)
+
         self.log('val_loss', loss.item()) # Lightning automatically averages scalars over batches for validation
+        self.log('val_acc', self.val_acc) # the batch size is considered when logging torchmetrics.Metric objects
         return loss
 
     def test_step(self, batch, batch_idx):
         x_batch, y_batch = self._get_batch(batch)
 
-        loss = self.loss(
+        loss, probs = self.loss(
             x_batch,
             y_batch,
             num_samples=self.num_samples,
             total_size=len(self.trainer.test_dataloaders.dataset),
-            reweight_ll=True # up-weight LL so as to estimate the full dataset loss (can be averaged)
+            reweight_ll=True, # up-weight LL so as to estimate the full dataset loss (can be averaged)
+            return_preds=True
         )
 
+        _ = self.test_acc(probs.squeeze(), y_batch)
+
         self.log('test_loss', loss.item()) # Lightning automatically averages scalars over batches for testing
+        self.log('test_acc', self.test_acc) # the batch size is considered when logging torchmetrics.Metric objects
         return loss
 
     # TODO: enable LR scheduling

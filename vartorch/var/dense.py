@@ -49,6 +49,23 @@ class DenseVarClassifier(VarClassifier):
                  likelihood_type='Categorical',
                  lr=1e-04):
 
+        # check feature numbers
+        if len(num_features) < 2:
+            raise ValueError('Number of features needs at least two entries')
+
+        # get number of classes
+        if likelihood_type == 'Bernoulli':
+            if num_features[-1] == 1:
+                num_classes = 2
+            else:
+                ValueError('Bernoulli likelihood requires a single output')
+
+        elif likelihood_type == 'Categorical':
+            num_classes = num_features[-1]
+
+        else:
+            raise ValueError(f'Unknown likelihood type: {likelihood_type}')
+
         # create variational model
         var_opts = {
             'weight_std': weight_std,
@@ -72,6 +89,7 @@ class DenseVarClassifier(VarClassifier):
             model=model,
             num_samples=num_samples,
             likelihood_type=likelihood_type,
+            num_classes=num_classes,
             lr=lr
         )
 
