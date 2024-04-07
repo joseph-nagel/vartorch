@@ -81,6 +81,7 @@ from .vis import (
     plot_post_predictions,
     plot_entropy_histograms,
     plot_data_2d,
-    plot_function_2d
+    plot_function_2d,
+    plot_data_and_preds_2d
 )
 

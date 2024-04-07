@@ -17,5 +17,9 @@ from .mnist import (
     plot_entropy_histograms
 )
 
-from .moons import plot_data_2d, plot_function_2d
+from .moons import (
+    plot_data_2d,
+    plot_function_2d,
+    plot_data_and_preds_2d
+)
 

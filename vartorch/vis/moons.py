@@ -99,3 +99,29 @@ def plot_function_2d(function,
     else:
         return fig, ax
 
+
+def plot_data_and_preds_2d(x_data,
+                           y_data,
+                           pred_function,
+                           figsize=(6, 4.5),
+                           xlim=(-2, 3),
+                           ylim=(-2, 2.5),
+                           levels=(0.3, 0.5, 0.7),
+                           title='Data and predictions'):
+    '''Plot data and predictions.'''
+
+    fig, ax = plt.subplots(figsize=figsize)
+
+    plot_data_2d(x_data, y_data, colors=(plt.cm.Set1(1), plt.cm.Set1(0)), ax=ax)
+
+    ax.set(xlim=xlim, ylim=ylim) # set limits before 2D function is plotted
+
+    plot_function_2d(pred_function, levels=levels, ax=ax)
+
+    ax.set_aspect('equal', adjustable='box')
+    ax.set_title(title)
+    ax.legend(loc='upper left')
+    fig.tight_layout()
+
+    return fig, ax
+
