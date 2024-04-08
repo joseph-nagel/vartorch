@@ -20,6 +20,10 @@ from .mnist import (
 from .moons import (
     plot_data_2d,
     plot_function_2d,
-    plot_data_and_preds_2d
+    plot_data_and_preds_2d,
+    point_prediction,
+    post_mean,
+    post_predictive,
+    post_uncertainty
 )
 

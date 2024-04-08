@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 
 
 def plot_data_2d(X,
@@ -124,4 +125,59 @@ def plot_data_and_preds_2d(x_data,
     fig.tight_layout()
 
     return fig, ax
+
+
+@torch.no_grad()
+def point_prediction(model, x):
+    '''Compute normal point predictions.'''
+    x_tensor = torch.tensor(x, dtype=torch.float32)
+
+    model.train(False) # turn off train mode
+
+    point_logits = model.predict(x_tensor.to(model.device))
+    point_probs = torch.sigmoid(point_logits).cpu().numpy()
+    return point_probs
+
+
+@torch.no_grad()
+def post_mean(var_model, x):
+    '''Predict with posterior mean weights.'''
+    x_tensor = torch.tensor(x, dtype=torch.float32)
+
+    var_model.train(False) # turn off train mode
+    var_model.sample(False) # turn off sampling
+
+    point_logits = var_model.predict(x_tensor.to(var_model.device))
+    point_probs = torch.sigmoid(point_logits).cpu().numpy()
+    return point_probs
+
+
+@torch.no_grad()
+def post_predictive(var_model, x, num_samples=100):
+    '''Predict according to the posterior predictive distribution.'''
+    x_tensor = torch.tensor(x, dtype=torch.float32)
+
+    var_model.train(False) # turn off train mode
+    var_model.sample(True) # turn on sampling
+
+    sampled_logits = var_model.predict(x_tensor.to(var_model.device), num_samples)
+    sampled_probs = torch.sigmoid(sampled_logits)
+
+    post_mean = torch.mean(sampled_probs, axis=-1).cpu().numpy()
+    return post_mean
+
+
+@torch.no_grad()
+def post_uncertainty(var_model, x, num_samples=100):
+    '''Compute the uncertainty associated with the posterior predictive.'''
+    x_tensor = torch.tensor(x, dtype=torch.float32)
+
+    var_model.train(False) # turn off train mode
+    var_model.sample(True) # turn on sampling
+
+    sampled_logits = var_model.predict(x_tensor.to(var_model.device), num_samples)
+    sampled_probs = torch.sigmoid(sampled_logits)
+
+    post_std = torch.std(sampled_probs, axis=-1).cpu().numpy()
+    return post_std
 
