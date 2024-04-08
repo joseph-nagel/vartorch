@@ -3,8 +3,8 @@ Variational mdoels.
 
 Summary
 -------
-The core class 'VariationalClassification' implements a scheme
-for stochastic variational inference in classification problems.
+The core class 'VarClassifier' implements a scheme for
+stochastic variational inference in classification problems.
 It turns models with variational and other layers into Bayesian classifiers.
 While the likelihood determines whether the problem is binary or multi-class,
 the model layers determine the unknown weights and their treatment.

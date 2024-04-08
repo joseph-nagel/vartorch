@@ -29,11 +29,10 @@ class VarClassifier(LightningModule):
     When turned off, however, the weights assume their mean value.
     The 'predict'-method therefore has a context-dependent behavior.
 
-    Some high-level methods automatically use the appropriate mode, for instance,
-    'train_epoch' or 'test_loss' have to use sampling for the loss simulation.
-    Another example is 'predict_proba' that computes posterior predictive probabilities
-    with sampling (num_samples>1) and mean weight probabilities without (num_samples=1).
-    The same behavior is found in 'predict_top' and 'test_acc', too.
+    Sampling has to be manually turned on (or off) for the loss simulation.
+    Some high-level methods automatically use the appropriate sampling mode.
+    An example is 'predict_proba' which computes posterior pred. probabilities with
+    sampling (num_samples>1) and mean weight probabilities without (num_samples=1).
 
     Parameters
     ----------
@@ -101,7 +100,10 @@ class VarClassifier(LightningModule):
     def sampling(self):
 
         # get sampling mode per layer
-        per_layer = [l.sampling for l in self.model.modules()]
+        per_layer = []
+        for layer in self.model.modules():
+            if hasattr(layer, 'sampling'):
+                per_layer.append(layer.sampling)
 
         # determine global sampling mode
         if len(per_layer) == 0:
@@ -132,6 +134,7 @@ class VarClassifier(LightningModule):
     def sample(self, sample_mode=True):
         '''Set sampling mode.'''
         self.sampling = sample_mode
+        return self
 
     def train(self, train_mode=True):
         '''Set training mode.'''
@@ -406,7 +409,7 @@ class VarClassifier(LightningModule):
         loss, probs = self.loss(
             x_batch,
             y_batch,
-            num_samples=self.num_samples,
+            num_samples=1, # use a single sample (mean value), since sampling is off while testing
             total_size=len(self.trainer.test_dataloaders.dataset),
             reweight_ll=True, # up-weight LL so as to estimate the full dataset loss (can be averaged)
             return_preds=True
@@ -417,6 +420,15 @@ class VarClassifier(LightningModule):
         self.log('test_loss', loss.item()) # Lightning automatically averages scalars over batches for testing
         self.log('test_acc', self.test_acc) # the batch size is considered when logging torchmetrics.Metric objects
         return loss
+
+    def on_train_epoch_start(self):
+        self.sample(True) # turn sampling on for training
+
+    def on_validation_epoch_start(self):
+        self.sample(True) # turn sampling on for validation
+
+    def on_test_epoch_start(self):
+        self.sample(False) # turn sampling off for testing
 
     # TODO: enable LR scheduling
     def configure_optimizers(self):

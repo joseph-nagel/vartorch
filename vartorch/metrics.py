@@ -41,7 +41,7 @@ def anomaly_score(model,
 
     Parameters
     ----------
-    model : VariationalClassification or PyTorch module
+    model : PyTorch/Lightning module
         Logits-predicting model.
     data_loader : PyTorch data loader
         Data-generating loader.
@@ -54,7 +54,10 @@ def anomaly_score(model,
 
     '''
 
-    # predictions
+    # turn off train mode
+    model.train(False)
+
+    # make predictions
     _, probs, _, top_prob = _extract_predict(
         model,
         data_loader,
@@ -63,13 +66,13 @@ def anomaly_score(model,
         **kwargs
     )
 
-    # scores
+    # calculate scores
     if mode == 'entropy':
         score = _entropy(probs)
     elif mode == 'maxprob':
         score = _maxprob_score(top_prob)
 
-    # array
+    # transform to array
     score = _make_array(score).squeeze()
 
     return score
@@ -77,17 +80,21 @@ def anomaly_score(model,
 
 def _entropy(probs):
     '''Compute entropy score.'''
-    if probs.shape[-1] == 1: # binary classifier
+
+    # compute Bernoulli entropy (binary classifier)
+    if probs.shape[-1] == 1:
         entropy = dist.Bernoulli(probs=probs).entropy()
-    else: # multi-class classifier
+
+    # compute categorical entropy (multi-class classifier)
+    else:
         entropy = dist.Categorical(probs=probs).entropy()
+
     return entropy
 
 
 def _maxprob_score(top_prob):
     '''Compute maxprob score.'''
-    score = 1 - top_prob
-    return score
+    return 1 - top_prob
 
 
 def calibration_metrics(model,
@@ -109,7 +116,7 @@ def calibration_metrics(model,
 
     Parameters
     ----------
-    model : VariationalClassification or PyTorch module
+    model : PyTorch/Lightning module
         Logits-predicting model.
     data_loader : PyTorch data loader
         Data-generating loader.
@@ -122,7 +129,10 @@ def calibration_metrics(model,
 
     '''
 
-    # predictions
+    # turn off train mode
+    model.train(False)
+
+    # make predictions
     labels, _, top_class, top_prob = _extract_predict(
         model,
         data_loader,
@@ -131,32 +141,34 @@ def calibration_metrics(model,
         **kwargs
     )
 
-    # arrays
+    # transform to arrays
     labels = _make_array(labels).squeeze()
     top_class = _make_array(top_class).squeeze()
     top_prob = _make_array(top_prob).squeeze()
 
-    # confidence bins and accuracies
+    # calculate confidence bins and accuracies
     conf_edges = np.linspace(0, 1, num_bins+1)
     binned_conf = (conf_edges[1:] + conf_edges[:-1]) / 2
 
     binned_acc = np.zeros(num_bins)
     binned_num_samples = np.zeros(num_bins, dtype='int')
+
     for idx in range(num_bins):
+
         lower = conf_edges[idx]
         upper = conf_edges[idx+1]
 
-        ids = np.where(np.logical_and(top_prob>=lower, top_prob<upper))[0]
+        ids = np.where(np.logical_and(top_prob >= lower, top_prob < upper))[0]
 
         binned_num_samples[idx] = len(ids)
-        binned_acc[idx] = (np.sum(labels[ids] == top_class[ids])) \
-                          / binned_num_samples[idx] \
+        binned_acc[idx] = (np.sum(labels[ids] == top_class[ids])) / binned_num_samples[idx] \
                           if binned_num_samples[idx] != 0 else np.nan
 
-    # calibration errors
+    # calculate calibration errors
     binned_ce, ece, mce = _calibration_errors(
         binned_conf, binned_acc, binned_num_samples
     )
+
     ce_dict = {'CEs': binned_ce, 'ECE': ece, 'MCE': mce}
 
     return conf_edges, binned_acc, ce_dict
@@ -164,9 +176,12 @@ def calibration_metrics(model,
 
 def _calibration_errors(binned_conf, binned_acc, binned_num_samples):
     '''Compute calibration errors (bin-wise, expected and maximum).'''
+
     binned_ce = np.abs(binned_acc - binned_conf)
+
     mce = np.max([e for e in binned_ce if not np.isnan(e)])
     ece = np.nansum(binned_num_samples * binned_ce) / np.sum(binned_num_samples)
+
     return binned_ce, ece, mce
 
 
@@ -186,7 +201,7 @@ def _extract_predict(model,
 
     Parameters
     ----------
-    model : VariationalClassification or PyTorch module
+    model : PyTorch/Lightning module
         Logits-predicting model.
     data_loader : PyTorch data loader
         Data-generating loader.
@@ -197,31 +212,32 @@ def _extract_predict(model,
 
     '''
 
-    # device
+    # set device
     if hasattr(model, 'device'):
         device = model.device
     else:
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    # eval mode
-    if hasattr(model, 'train'):
-        model.train(False)
+    # turn off train mode
+    model.train(False)
 
-    # labels and probabilities
+    # gather labels and probabilities
     labels_list = []
     probs_list = []
-    for epoch_idx in range(num_epochs):
-        for X_batch, y_batch in data_loader:
 
-            X_batch = X_batch.to(device)
+    for _ in range(num_epochs):
+        for x_batch, y_batch in data_loader:
+
+            x_batch = x_batch.to(device)
             y_batch = y_batch.to(device)
 
-            # predict probabilities directly (VariationalClassification)
+            # predict probabilities directly
             if hasattr(model, 'predict_proba'):
-                batch_probs = model.predict_proba(X_batch, **kwargs)
-            # predict logits first (PyTorch module)
+                batch_probs = model.predict_proba(x_batch, **kwargs)
+
+            # predict logits first
             else:
-                batch_logits = model(X_batch)
+                batch_logits = model(x_batch)
 
                 if batch_logits.shape[-1] == 1: # binary classifier
                     batch_probs = torch.sigmoid(batch_logits)
@@ -235,10 +251,11 @@ def _extract_predict(model,
     labels = torch.cat(labels_list, dim=0)
     probs = torch.cat(probs_list, dim=0)
 
-    # top class and probability
+    # get top class and probability
     if probs.shape[-1] == 1: # binary classifier
         top_class = (probs >= threshold).int()
-        top_prob = torch.where(top_class==1, probs, 1-probs)
+        top_prob = torch.where(top_class==1, probs, 1 - probs)
+
     else: # multi-class classifier
         top_prob, top_class = torch.topk(probs, k=1, dim=1)
 
