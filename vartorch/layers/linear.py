@@ -62,21 +62,44 @@ class VarLinear(VarLayer):
 
         super().__init__(param_mode)
 
+        # set attributes
         self.in_features = in_features
         self.out_features = out_features
 
-        self.weight_std = weight_std
-        self.bias_std = bias_std
+        self.register_buffer('weight_std', torch.tensor(weight_std))
+        self.register_buffer('bias_std', torch.tensor(bias_std))
 
+        # create parameters
+        self.w_mu = nn.Parameter(torch.empty(self.out_features, self.in_features))
+        self.w_sigma_param = nn.Parameter(torch.empty(self.out_features, self.in_features))
+
+        self.b_mu = nn.Parameter(torch.empty(self.out_features))
+        self.b_sigma_param = nn.Parameter(torch.empty(self.out_features))
+
+        # initialize parameters
         self.reset_parameters()
 
+    # TODO: find optional initialization strategy
     def reset_parameters(self):
-        '''Reset the parameters randomly.'''
-        self.w_mu = nn.Parameter(torch.randn(self.out_features, self.in_features))
-        self.w_sigma_param = nn.Parameter(torch.randn(self.out_features, self.in_features))
+        '''Re-initialize the parameters.'''
 
-        self.b_mu = nn.Parameter(torch.randn(self.out_features))
-        self.b_sigma_param = nn.Parameter(torch.randn(self.out_features))
+        # initialize means of the weights like nn.Linear
+        torch.nn.init.kaiming_uniform_(self.w_mu)
+
+        # initialize std. of the weights with the prior value
+        torch.nn.init.constant_(
+            self.w_sigma_param,
+            self.sigma_inverse(self.weight_std)
+        )
+
+        # initialize means of the bias terms with zeros
+        torch.nn.init.zeros_(self.b_mu)
+
+        # initialize std. of the bias terms with the prior value
+        torch.nn.init.constant_(
+            self.b_sigma_param,
+            self.sigma_inverse(self.bias_std)
+        )
 
     def forward(self, X):
 

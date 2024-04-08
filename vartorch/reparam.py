@@ -29,12 +29,24 @@ def reparametrize(mu, sigma):
 
 def sigma_from_log(log_sigma):
     '''Calculate sigma from log-sigma.'''
-    sigma = torch.exp(log_sigma) # log_sigma = torch.log(sigma)
+    sigma = torch.exp(log_sigma) #
     return sigma
 
 
 def sigma_from_rho(rho):
     '''Calculate sigma from rho.'''
-    sigma = torch.log(1 + torch.exp(rho)) # rho = torch.log(torch.exp(sigma) - 1)
+    sigma = torch.log(1 + torch.exp(rho))
     return sigma
+
+
+def log_from_sigma(sigma):
+    '''Calculate log-sigma from sigma.'''
+    log_sigma = torch.log(sigma)
+    return log_sigma
+
+
+def rho_from_sigma(sigma):
+    '''Calculate rho from sigma.'''
+    rho = torch.log(torch.exp(sigma) - 1)
+    return rho
 

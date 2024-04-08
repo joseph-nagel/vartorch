@@ -67,7 +67,10 @@ from .model import DenseBlock
 from .reparam import (
     reparametrize,
     sigma_from_log,
-    sigma_from_rho
+    sigma_from_rho,
+    log_from_sigma,
+    rho_from_sigma
+
 )
 
 from .var import (

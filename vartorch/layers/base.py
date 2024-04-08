@@ -11,7 +11,12 @@ In particular, it comes with a parametrization mode and a sampling switch.
 
 import torch.nn as nn
 
-from ..reparam import sigma_from_log, sigma_from_rho
+from ..reparam import (
+    sigma_from_log,
+    sigma_from_rho,
+    log_from_sigma,
+    rho_from_sigma
+)
 
 
 class VarLayer(nn.Module):
@@ -59,11 +64,14 @@ class VarLayer(nn.Module):
         else:
             raise ValueError(f'Unknown parametrization: {param_mode}')
 
-        # set parametrization function
+        # set parametrization functions
         if param_mode == 'log':
             self.sigma = sigma_from_log
+            self.sigma_inverse = log_from_sigma
+
         elif param_mode == 'rho':
             self.sigma = sigma_from_rho
+            self.sigma_inverse = rho_from_sigma
 
     @property
     def sampling(self):
