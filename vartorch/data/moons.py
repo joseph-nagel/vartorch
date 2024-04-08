@@ -12,7 +12,23 @@ def make_half_moons(num_samples,
                     offsets=(0.15, -0.15),
                     random_state=0,
                     test_size=None):
-    '''Create half moons data.'''
+    '''
+    Create half moons data.
+
+    Parameters
+    ----------
+    num_samples : int
+        Number of samples to create.
+    noise_level : float
+        Noise standard deviation.
+    offsets : tuple
+        Offsets applied to the data.
+    random_state : int
+        Random generator seed.
+    test_size : int or float
+        Test size parameter.
+
+    '''
 
     # create data
     x, y = make_moons(
@@ -49,17 +65,17 @@ class MoonsDataModule(LightningDataModule):
     ----------
     num_train : int
         Number of training samples.
-    num_val : int, optional
+    num_val : int
         Number of validation samples.
-    num_test : int, optional
+    num_test : int
         Number of testing samples.
-    noise_level : float, optional
+    noise_level : float
         Noise standard deviation.
-    offsets : tuple, optional
+    offsets : tuple
         Offsets applied to the data.
-    batch_size : int, optional
+    batch_size : int
         Batch size of the data loader.
-    num_workers : int, optional
+    num_workers : int
         Number of workers for the loader.
 
     '''

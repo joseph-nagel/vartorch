@@ -1,4 +1,13 @@
-'''Variational base layer.'''
+'''
+Variational base layer.
+
+Summary
+-------
+A base class for variational layers is defined in 'VarLayer'.
+This manages the main settings regarding the probabilistic weights.
+In particular, it comes with a parametrization mode and a sampling switch.
+
+'''
 
 import torch.nn as nn
 

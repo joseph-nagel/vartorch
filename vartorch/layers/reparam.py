@@ -1,4 +1,12 @@
-'''Reparametrization trick.'''
+'''
+Reparametrization trick.
+
+Summary
+-------
+'Reparametrize' implements the reparametrization trick for the MC estimation of the ELBO.
+It can be used as component for building advanced layers.
+
+'''
 
 from ..reparam import reparametrize
 from .base import VarLayer

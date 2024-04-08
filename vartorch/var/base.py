@@ -1,4 +1,20 @@
-'''Variational classifier.'''
+'''
+Variational classifier.
+
+Summary
+-------
+The core class 'VarClassifier' implements a scheme for
+stochastic variational inference in classification problems.
+It turns models with variational and other layers into Bayesian classifiers.
+While the likelihood determines whether the problem is binary or multi-class,
+the model layers determine the unknown weights and their treatment.
+
+A posterior over the weights of the variational layers is computed by
+maximizing the ELBO w.r.t. the parameters of the variational distribution.
+Other non-Bayesian unknown parameters of the prior and the likelihood,
+such as the weights of non-variational layers, can also be learned this way.
+
+'''
 
 import torch
 import torch.distributions as dist
@@ -422,13 +438,13 @@ class VarClassifier(LightningModule):
         return loss
 
     def on_train_epoch_start(self):
-        self.sample(True) # turn sampling on for training
+        self.sample(True) # turn on sampling for training
 
     def on_validation_epoch_start(self):
-        self.sample(True) # turn sampling on for validation
+        self.sample(True) # turn on sampling for validation
 
     def on_test_epoch_start(self):
-        self.sample(False) # turn sampling off for testing
+        self.sample(False) # turn off sampling for testing
 
     # TODO: enable LR scheduling
     def configure_optimizers(self):

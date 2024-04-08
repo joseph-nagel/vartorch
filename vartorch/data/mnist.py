@@ -18,11 +18,11 @@ class MNISTDataModule(LightningDataModule):
         Directory for storing the data.
     mean : float
         Mean for data normalization.
-    std : float, optional
+    std : float
         Standard deviation for normalization.
-    batch_size : int, optional
+    batch_size : int
         Batch size of the data loader.
-    num_workers : int, optional
+    num_workers : int
         Number of workers for the loader.
 
     '''
