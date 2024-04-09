@@ -22,7 +22,7 @@ def make_half_moons(num_samples,
     noise_level : float
         Noise standard deviation.
     offsets : tuple
-        Offsets applied to the data.
+        Class-specific offsets.
     random_state : int
         Random generator seed.
     test_size : int or float
@@ -38,7 +38,11 @@ def make_half_moons(num_samples,
         random_state=random_state
     )
 
-    # add offsets
+    # center data
+    x[:,0] -= 0.5
+    x[:,1] -= 0.25
+
+    # add class-specific offsets
     x[y==0, 1] += offsets[0]
     x[y==1, 1] += offsets[1]
 

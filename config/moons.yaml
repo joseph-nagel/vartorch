@@ -16,14 +16,14 @@ data:
 model:
   class_path: "vartorch.DenseVarClassifier"
   init_args:
-    num_features: [2, 32, 32, 1]
-    batchnorm: false
-    activation: "elu"
+    num_features: [2, 32, 1]
+    batchnorm: true
+    activation: "tanh"
     last_activation: null
     drop_rate: null
     weight_std: 1.0
     bias_std: 1.0
-    param_mode: "rho"
+    param_mode: "log"
     num_samples: 1
     likelihood_type: "Bernoulli"
     lr: 0.01
