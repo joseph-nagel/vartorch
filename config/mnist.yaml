@@ -27,14 +27,14 @@ model:
     double_conv: true
     weight_std: 1.0
     bias_std: 1.0
-    param_mode: "rho"
+    param_mode: "log"
     num_samples: 1
     likelihood_type: "Categorical"
-    lr: 0.0001
+    lr: 0.001
 
 trainer:
   accelerator: "cpu"
-  max_epochs: 20
+  max_epochs: 50
   log_every_n_steps: 100
   logger:
     class_path: "lightning.pytorch.loggers.TensorBoardLogger"
@@ -43,6 +43,9 @@ trainer:
       name: "mnist"
       version: null
   callbacks:
+    - class_path: "lightning.pytorch.callbacks.LearningRateMonitor"
+      init_args:
+        logging_interval: null
     - class_path: "lightning.pytorch.callbacks.ModelCheckpoint"
       init_args:
         filename: "best"

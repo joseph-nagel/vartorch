@@ -446,8 +446,25 @@ class VarClassifier(LightningModule):
     def on_test_epoch_start(self):
         self.sample(False) # turn off sampling for testing
 
-    # TODO: enable LR scheduling
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
-        return optimizer
+
+        # create reduce-on-plateau schedule
+        # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        #     optimizer=optimizer
+        # )
+
+        # create cosine annealing schedule
+        lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer=optimizer,
+            T_max=self.trainer.max_epochs
+        )
+
+        # lr_config = {
+        #     'scheduler': lr_scheduler, # LR scheduler
+        #     'interval': 'epoch', # time unit
+        #     'frequency': 1 # update frequency
+        # }
+
+        return [optimizer], [lr_scheduler]
 
