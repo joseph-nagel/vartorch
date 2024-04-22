@@ -20,6 +20,8 @@ class MNISTDataModule(LightningDataModule):
         Mean for data normalization.
     std : float
         Standard deviation for normalization.
+    random_state : int
+        Random generator seed.
     batch_size : int
         Batch size of the data loader.
     num_workers : int
@@ -32,6 +34,7 @@ class MNISTDataModule(LightningDataModule):
                  data_dir='.',
                  mean=None,
                  std=None,
+                 random_state=42,
                  batch_size=32,
                  num_workers=0):
 
@@ -49,6 +52,9 @@ class MNISTDataModule(LightningDataModule):
 
         # set data location
         self.data_dir = data_dir
+
+        # set random state
+        self.random_state = random_state
 
         # set loader parameters
         self.batch_size = batch_size
@@ -100,7 +106,7 @@ class MNISTDataModule(LightningDataModule):
             self.train_set, self.val_set = random_split(
                 train_set,
                 [50000, 10000],
-                generator=torch.Generator().manual_seed(42)
+                generator=torch.Generator().manual_seed(self.random_state)
             )
 
         # create test dataset

@@ -1,4 +1,4 @@
-'''Half moons datamodule.'''
+'''Half-moons datamodule.'''
 
 from sklearn.datasets import make_moons
 from sklearn.model_selection import train_test_split
@@ -10,10 +10,10 @@ from lightning import LightningDataModule
 def make_half_moons(num_samples,
                     noise_level=0.15,
                     offsets=(0.15, -0.15),
-                    random_state=0,
+                    random_state=None,
                     test_size=None):
     '''
-    Create half moons data.
+    Create half-moons data.
 
     Parameters
     ----------
@@ -63,7 +63,7 @@ def make_half_moons(num_samples,
 
 class MoonsDataModule(LightningDataModule):
     '''
-    DataModule for half moons data.
+    DataModule for half-moons data.
 
     Parameters
     ----------
@@ -77,6 +77,8 @@ class MoonsDataModule(LightningDataModule):
         Noise standard deviation.
     offsets : tuple
         Offsets applied to the data.
+    random_state : int
+        Random generator seed.
     batch_size : int
         Batch size of the data loader.
     num_workers : int
@@ -90,6 +92,7 @@ class MoonsDataModule(LightningDataModule):
                  num_test=0,
                  noise_level=0.15,
                  offsets=(0.15, -0.15),
+                 random_state=42,
                  batch_size=32,
                  num_workers=0):
 
@@ -101,6 +104,9 @@ class MoonsDataModule(LightningDataModule):
         self.num_test = abs(int(num_test))
         self.noise_level = abs(noise_level)
         self.offsets = offsets
+
+        # set random state
+        self.random_state = random_state
 
         # set loader parameters
         self.batch_size = batch_size
@@ -116,7 +122,7 @@ class MoonsDataModule(LightningDataModule):
             num_samples,
             noise_level=self.noise_level,
             offsets=self.offsets,
-            random_state=42,
+            random_state=self.random_state,
             test_size=None
         )
 

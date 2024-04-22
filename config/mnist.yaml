@@ -9,6 +9,7 @@ data:
     data_dir: "run/data"
     mean: 0.5
     std: 0.5
+    random_state: 42
     batch_size: 32
     num_workers: 0
 
