@@ -32,7 +32,6 @@ from . import (
     vis
 )
 
-
 from .data import (
     make_half_moons,
     MoonsDataModule,

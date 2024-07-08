@@ -315,6 +315,7 @@ class VarClassifier(LightningModule):
         if return_preds:
             logits_samples = torch.stack(logits_samples, dim=-1).squeeze(dim=-1)
             probs = self.probs_from_logits(logits_samples)
+
             return elbo, probs
         else:
             return elbo
@@ -399,6 +400,7 @@ class VarClassifier(LightningModule):
 
         self.log('train_loss', loss.item()) # Lightning logs batch-wise scalars during training per default
         self.log('train_acc', self.train_acc) # the same applies to torchmetrics.Metric objects
+
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -417,6 +419,7 @@ class VarClassifier(LightningModule):
 
         self.log('val_loss', loss.item()) # Lightning automatically averages scalars over batches for validation
         self.log('val_acc', self.val_acc) # the batch size is considered when logging torchmetrics.Metric objects
+
         return loss
 
     def test_step(self, batch, batch_idx):
@@ -435,6 +438,7 @@ class VarClassifier(LightningModule):
 
         self.log('test_loss', loss.item()) # Lightning automatically averages scalars over batches for testing
         self.log('test_acc', self.test_acc) # the batch size is considered when logging torchmetrics.Metric objects
+
         return loss
 
     def on_train_epoch_start(self):

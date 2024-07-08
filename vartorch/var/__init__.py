@@ -9,8 +9,11 @@ dense : Dense variational classifier.
 
 '''
 
-from . import base, conv, dense
-
+from . import (
+    base,
+    conv,
+    dense
+)
 
 from .base import VarClassifier
 

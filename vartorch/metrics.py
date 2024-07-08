@@ -169,7 +169,11 @@ def calibration_metrics(model,
         binned_conf, binned_acc, binned_num_samples
     )
 
-    ce_dict = {'CEs': binned_ce, 'ECE': ece, 'MCE': mce}
+    ce_dict = {
+        'CEs': binned_ce,
+        'ECE': ece,
+        'MCE': mce
+    }
 
     return conf_edges, binned_acc, ce_dict
 

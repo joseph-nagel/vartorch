@@ -10,7 +10,6 @@ moons : For the half-moons example.
 
 from . import mnist, moons
 
-
 from .mnist import (
     plot_point_predictions,
     plot_post_predictions,
