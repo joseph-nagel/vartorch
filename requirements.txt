@@ -1,6 +1,8 @@
 numpy
 torch
 lightning
+tensorboard
+mlflow
 matplotlib
 notebook
 

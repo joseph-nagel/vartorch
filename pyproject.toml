@@ -19,7 +19,9 @@ keywords = ["variational inference", "Bayesian neural network"]
 dependencies = [
     "numpy",
     "torch",
-    "lightning"
+    "lightning",
+    "tensorboard",
+    "mlflow"
 ]
 
 [project.optional-dependencies]
