@@ -17,17 +17,23 @@ A frequentist notion of well-calibration can be investigated thereby.
 
 '''
 
+from typing import Any
+
 import numpy as np
 import torch
+import torch.nn as nn
 import torch.distributions as dist
+from torch.utils.data import DataLoader
 
 
-def anomaly_score(model,
-                  data_loader,
-                  mode='entropy',
-                  num_epochs=1,
-                  threshold=0.5,
-                  **kwargs):
+def anomaly_score(
+    model: nn.Module,
+    data_loader: DataLoader,
+    mode: str = 'entropy',
+    num_epochs: int = 1,
+    threshold: float = 0.5,
+    **kwargs: Any
+) -> np.ndarray:
     '''
     Compute anomaly score.
 
@@ -68,17 +74,17 @@ def anomaly_score(model,
 
     # calculate scores
     if mode == 'entropy':
-        score = _entropy(probs)
+        score_tensor = _entropy(probs)
     elif mode == 'maxprob':
-        score = _maxprob_score(top_prob)
+        score_tensor = _maxprob_score(top_prob)
 
     # transform to array
-    score = _make_array(score).squeeze()
+    score = _make_array(score_tensor).squeeze()
 
     return score
 
 
-def _entropy(probs):
+def _entropy(probs: torch.Tensor) -> torch.Tensor:
     '''Compute entropy score.'''
 
     # compute Bernoulli entropy (binary classifier)
@@ -92,17 +98,19 @@ def _entropy(probs):
     return entropy
 
 
-def _maxprob_score(top_prob):
+def _maxprob_score(top_prob: torch.Tensor) -> torch.Tensor:
     '''Compute maxprob score.'''
     return 1 - top_prob
 
 
-def calibration_metrics(model,
-                        data_loader,
-                        num_bins=10,
-                        num_epochs=1,
-                        threshold=0.5,
-                        **kwargs):
+def calibration_metrics(
+    model: nn.Module,
+    data_loader: DataLoader,
+    num_bins: int = 10,
+    num_epochs: int = 1,
+    threshold: float = 0.5,
+    **kwargs: Any
+) -> tuple[np.ndarray, np.ndarray, dict[str, np.ndarray]]:
     '''
     Evaluate calibration metrics.
 
@@ -133,7 +141,7 @@ def calibration_metrics(model,
     model.train(False)
 
     # make predictions
-    labels, _, top_class, top_prob = _extract_predict(
+    labels_tensor, _, top_class_tensor, top_prob_tensor = _extract_predict(
         model,
         data_loader,
         num_epochs,
@@ -142,9 +150,9 @@ def calibration_metrics(model,
     )
 
     # transform to arrays
-    labels = _make_array(labels).squeeze()
-    top_class = _make_array(top_class).squeeze()
-    top_prob = _make_array(top_prob).squeeze()
+    labels = _make_array(labels_tensor).squeeze()
+    top_class = _make_array(top_class_tensor).squeeze()
+    top_prob = _make_array(top_prob_tensor).squeeze()
 
     # calculate confidence bins and accuracies
     conf_edges = np.linspace(0, 1, num_bins+1)
@@ -178,7 +186,11 @@ def calibration_metrics(model,
     return conf_edges, binned_acc, ce_dict
 
 
-def _calibration_errors(binned_conf, binned_acc, binned_num_samples):
+def _calibration_errors(
+    binned_conf: np.ndarray,
+    binned_acc: np.ndarray,
+    binned_num_samples: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     '''Compute calibration errors (bin-wise, expected and maximum).'''
 
     binned_ce = np.abs(binned_acc - binned_conf)
@@ -190,11 +202,13 @@ def _calibration_errors(binned_conf, binned_acc, binned_num_samples):
 
 
 @torch.no_grad()
-def _extract_predict(model,
-                     data_loader,
-                     num_epochs=1,
-                     threshold=0.5,
-                     **kwargs):
+def _extract_predict(
+    model: nn.Module,
+    data_loader: DataLoader,
+    num_epochs: int = 1,
+    threshold: float = 0.5,
+    **kwargs: Any
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     '''
     Extract labels from a data loader and model predictions.
 
@@ -266,8 +280,7 @@ def _extract_predict(model,
     return labels, probs, top_class, top_prob
 
 
-def _make_array(tensor):
+def _make_array(tensor: torch.Tensor) -> np.ndarray:
     '''Transform tensor into array.'''
-    array = tensor.detach().cpu().numpy()
-    return array
+    return tensor.detach().cpu().numpy()
 

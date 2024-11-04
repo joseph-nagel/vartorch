@@ -1,7 +1,10 @@
 '''Conv. variational classifier.'''
 
+from collections.abc import Sequence
+
 import torch.nn as nn
 
+from ..layers import IntOrInts, ActivType
 from ..model import ConvDown, DenseBlock
 from .base import VarClassifier
 
@@ -48,23 +51,25 @@ class ConvVarClassifier(VarClassifier):
 
     '''
 
-    def __init__(self,
-                 num_channels,
-                 num_features,
-                 kernel_size=3,
-                 pooling=2,
-                 batchnorm=False,
-                 activation='leaky_relu',
-                 last_activation=None,
-                 drop_rate=None,
-                 pool_last=True,
-                 double_conv=True,
-                 weight_std=1.0,
-                 bias_std=1.0,
-                 param_mode='log',
-                 num_samples=1,
-                 likelihood_type='Categorical',
-                 lr=1e-04):
+    def __init__(
+        self,
+        num_channels: Sequence[int],
+        num_features: Sequence[int],
+        kernel_size: IntOrInts = 3,
+        pooling: int | None = 2,
+        batchnorm: bool = False,
+        activation: ActivType | None = 'leaky_relu',
+        last_activation: ActivType | None = None,
+        drop_rate: float | None = None,
+        pool_last: bool = True,
+        double_conv: bool = True,
+        weight_std: float = 1.0,
+        bias_std: float = 1.0,
+        param_mode: str = 'log',
+        num_samples: int = 1,
+        likelihood_type: str = 'Categorical',
+        lr: float = 1e-04
+    ) -> None:
 
         # check feature numbers
         if len(num_features) < 2:

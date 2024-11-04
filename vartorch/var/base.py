@@ -16,10 +16,16 @@ such as the weights of non-variational layers, can also be learned this way.
 
 '''
 
+from typing import Self
+from collections.abc import Sequence
+
 import torch
+import torch.nn as nn
 import torch.distributions as dist
 from lightning.pytorch import LightningModule
 from torchmetrics.classification import Accuracy
+
+from ..layers import VarLayer
 
 
 class VarClassifier(LightningModule):
@@ -65,12 +71,14 @@ class VarClassifier(LightningModule):
 
     '''
 
-    def __init__(self,
-                 model,
-                 num_samples=1,
-                 likelihood_type='Categorical',
-                 num_classes=None,
-                 lr=1e-04):
+    def __init__(
+        self,
+        model: nn.Module,
+        num_samples: int = 1,
+        likelihood_type: str = 'Categorical',
+        num_classes: int | None = None,
+        lr: float = 1e-04
+    ) -> None:
 
         super().__init__()
 
@@ -113,12 +121,13 @@ class VarClassifier(LightningModule):
             self.test_acc = Accuracy(task='multiclass', num_classes=num_classes)
 
     @property
-    def sampling(self):
+    def sampling(self) -> bool:
 
         # get sampling mode per layer
         per_layer = []
+
         for layer in self.model.modules():
-            if hasattr(layer, 'sampling'):
+            if isinstance(layer, VarLayer): # if hasattr(layer, 'sampling'):
                 per_layer.append(layer.sampling)
 
         # determine global sampling mode
@@ -140,19 +149,19 @@ class VarClassifier(LightningModule):
         return sampling
 
     @sampling.setter
-    def sampling(self, sample_mode):
+    def sampling(self, sample_mode: bool) -> None:
 
         # set sampling mode for all model layers
         for layer in self.model.modules():
-            if hasattr(layer, 'sampling'):
+            if isinstance(layer, VarLayer): # if hasattr(layer, 'sampling'):
                 layer.sampling = sample_mode
 
-    def sample(self, sample_mode=True):
+    def sample(self, sample_mode: bool = True) -> Self:
         '''Set sampling mode.'''
         self.sampling = sample_mode
         return self
 
-    def train(self, train_mode=True):
+    def train(self, train_mode: bool = True) -> Self:
         '''Set training mode.'''
 
         # set module training mode
@@ -164,26 +173,27 @@ class VarClassifier(LightningModule):
 
         return self
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         '''Run model.'''
         logits = self.model(x)
         return logits
 
-    def predict(self, x, num_samples=1):
+    def predict(self, x: torch.Tensor, num_samples: int = 1) -> torch.Tensor:
         '''Predict logits.'''
 
         # loop over samples
-        logits_samples = []
+        logits_list = []
+
         for _ in range(num_samples):
             logits_sample = self(x)
-            logits_samples.append(logits_sample)
+            logits_list.append(logits_sample)
 
         # stack samples
-        logits_samples = torch.stack(logits_samples, dim=-1).squeeze(dim=-1)
+        logits_samples = torch.stack(logits_list, dim=-1).squeeze(dim=-1)
 
         return logits_samples
 
-    def probs_from_logits(self, logits, average=True):
+    def probs_from_logits(self, logits: torch.Tensor, average: bool = True) -> torch.Tensor:
         '''Compute (average) probabilities from (samples of) logits.'''
 
         if logits.ndim not in (2, 3):
@@ -201,7 +211,7 @@ class VarClassifier(LightningModule):
 
         return probs
 
-    def predict_proba(self, x, num_samples=1):
+    def predict_proba(self, x: torch.Tensor, num_samples: int = 1) -> torch.Tensor:
         '''Predict probabilities (mean weight or posterior predictive).'''
 
         # predict with posterior mean weights
@@ -230,10 +240,12 @@ class VarClassifier(LightningModule):
 
         return probs
 
-    def predict_top(self,
-                    x,
-                    num_samples=1,
-                    threshold=0.5):
+    def predict_top(
+        self,
+        x: torch.Tensor,
+        num_samples: int = 1,
+        threshold: float = 0.5
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         '''Predict top class and probability (mean weight or posterior predictive).'''
 
         # predict probabilities
@@ -248,10 +260,10 @@ class VarClassifier(LightningModule):
 
         return top_class, top_prob
 
-    def kl(self):
+    def kl(self) -> torch.Tensor:
         '''Accumulate KL divergence from model layers.'''
 
-        kl = 0.0
+        kl = torch.tensor(0.0, device=self.device)
 
         # accumulate KL div. from appropriate layers
         for layer in self.model.modules():
@@ -260,7 +272,12 @@ class VarClassifier(LightningModule):
 
         return kl
 
-    def ll(self, x, y, return_preds=False):
+    def ll(
+        self,
+        x: torch.Tensor,
+        y: torch.Tensor,
+        return_preds: bool = False
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         '''Compute the log-likelihood.'''
 
         # predict logits
@@ -277,20 +294,22 @@ class VarClassifier(LightningModule):
         else:
             return ll
 
-    def elbo(self,
-             x,
-             y,
-             num_samples=1,
-             ll_weight=1.0,
-             kl_weight=1.0,
-             return_preds=False):
+    def elbo(
+        self,
+        x: torch.Tensor,
+        y: torch.Tensor,
+        num_samples: int = 1,
+        ll_weight: float = 1.0,
+        kl_weight: float = 1.0,
+        return_preds: bool = False
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         '''Simulate the ELBO by MC sampling.'''
 
-        ll = 0.0
-        kl = 0.0
+        ll = torch.tensor(0.0, device=self.device)
+        kl = torch.tensor(0.0, device=self.device)
 
         if return_preds:
-            logits_samples = []
+            logits_list = []
 
         # loop over samples
         for _ in range(num_samples):
@@ -299,7 +318,7 @@ class VarClassifier(LightningModule):
 
             if return_preds:
                 ll_sample, logits_sample = out
-                logits_samples.append(logits_sample)
+                logits_list.append(logits_sample)
             else:
                 ll_sample = out
 
@@ -313,20 +332,22 @@ class VarClassifier(LightningModule):
         elbo = ll * ll_weight - kl * kl_weight
 
         if return_preds:
-            logits_samples = torch.stack(logits_samples, dim=-1).squeeze(dim=-1)
+            logits_samples = torch.stack(logits_list, dim=-1).squeeze(dim=-1)
             probs = self.probs_from_logits(logits_samples)
 
             return elbo, probs
         else:
             return elbo
 
-    def loss(self,
-             x,
-             y,
-             num_samples=1,
-             total_size=None,
-             reweight_ll=True,
-             return_preds=False):
+    def loss(
+        self,
+        x: torch.Tensor,
+        y: torch.Tensor,
+        num_samples: int = 1,
+        total_size: int | None = None,
+        reweight_ll: bool = True,
+        return_preds: bool = False
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         '''Simulate the negative-ELBO loss.'''
 
         # get weighting factors
@@ -368,7 +389,9 @@ class VarClassifier(LightningModule):
             return loss
 
     @staticmethod
-    def _get_batch(batch):
+    def _get_batch(
+        batch: Sequence[torch.Tensor] | dict[str, torch.Tensor]
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         '''Get batch features and labels.'''
 
         if isinstance(batch, (tuple, list)):
@@ -384,7 +407,12 @@ class VarClassifier(LightningModule):
 
         return x_batch, y_batch
 
-    def training_step(self, batch, batch_idx):
+    def training_step(
+        self,
+        batch: Sequence[torch.Tensor] | dict[str, torch.Tensor],
+        batch_idx: int
+    ) -> torch.Tensor:
+
         x_batch, y_batch = self._get_batch(batch)
 
         loss, probs = self.loss(
@@ -403,7 +431,12 @@ class VarClassifier(LightningModule):
 
         return loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(
+        self,
+        batch: Sequence[torch.Tensor] | dict[str, torch.Tensor],
+        batch_idx: int
+    ) -> torch.Tensor:
+
         x_batch, y_batch = self._get_batch(batch)
 
         loss, probs = self.loss(
@@ -422,7 +455,12 @@ class VarClassifier(LightningModule):
 
         return loss
 
-    def test_step(self, batch, batch_idx):
+    def test_step(
+        self,
+        batch: Sequence[torch.Tensor] | dict[str, torch.Tensor],
+        batch_idx: int
+    ) -> torch.Tensor:
+
         x_batch, y_batch = self._get_batch(batch)
 
         loss, probs = self.loss(
@@ -441,16 +479,19 @@ class VarClassifier(LightningModule):
 
         return loss
 
-    def on_train_epoch_start(self):
+    def on_train_epoch_start(self) -> None:
         self.sample(True) # turn on sampling for training
 
-    def on_validation_epoch_start(self):
+    def on_validation_epoch_start(self) -> None:
         self.sample(True) # turn on sampling for validation
 
-    def on_test_epoch_start(self):
+    def on_test_epoch_start(self) -> None:
         self.sample(False) # turn off sampling for testing
 
-    def configure_optimizers(self):
+    def configure_optimizers(
+        self
+    ) -> tuple[list[torch.optim.Optimizer], list[torch.optim.lr_scheduler.LRScheduler]]:
+
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
 
         # create reduce-on-plateau schedule

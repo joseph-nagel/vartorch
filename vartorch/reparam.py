@@ -21,31 +21,33 @@ Here, the standard deviation is calculated from real-valued parameters via simpl
 import torch
 
 
-def reparametrize(mu, sigma):
+def reparametrize(mu: torch.Tensor, sigma: torch.Tensor) -> torch.Tensor:
     '''Sample with the reparametrization trick.'''
     eps = torch.randn_like(sigma)
     return mu + (eps * sigma)
 
 
-def sigma_from_log(log_sigma):
+def sigma_from_log(sigma_param: torch.Tensor) -> torch.Tensor:
     '''Calculate sigma from log-sigma.'''
-    sigma = torch.exp(log_sigma) #
+    log_sigma = sigma_param
+    sigma = torch.exp(log_sigma)
     return sigma
 
 
-def sigma_from_rho(rho):
+def sigma_from_rho(sigma_param: torch.Tensor) -> torch.Tensor:
     '''Calculate sigma from rho.'''
+    rho = sigma_param
     sigma = torch.log(1 + torch.exp(rho))
     return sigma
 
 
-def log_from_sigma(sigma):
+def log_from_sigma(sigma: torch.Tensor) -> torch.Tensor:
     '''Calculate log-sigma from sigma.'''
     log_sigma = torch.log(sigma)
     return log_sigma
 
 
-def rho_from_sigma(sigma):
+def rho_from_sigma(sigma: torch.Tensor) -> torch.Tensor:
     '''Calculate rho from sigma.'''
     rho = torch.log(torch.exp(sigma) - 1)
     return rho

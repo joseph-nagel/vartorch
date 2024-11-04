@@ -28,6 +28,8 @@ from .linear import (
 from .reparam import Reparametrize
 
 from .utils import (
+    IntOrInts,
+    ActivType,
     make_activation,
     make_block,
     make_dropout,

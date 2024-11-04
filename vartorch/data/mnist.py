@@ -6,6 +6,10 @@ from torchvision import datasets, transforms
 from lightning import LightningDataModule
 
 
+# define type alias
+FloatOrFloats = float | tuple[float, float, float]
+
+
 class MNISTDataModule(LightningDataModule):
     '''
     DataModule for MNIST-like datasets.
@@ -29,14 +33,16 @@ class MNISTDataModule(LightningDataModule):
 
     '''
 
-    def __init__(self,
-                 data_set='mnist',
-                 data_dir='.',
-                 mean=None,
-                 std=None,
-                 random_state=42,
-                 batch_size=32,
-                 num_workers=0):
+    def __init__(
+        self,
+        data_set: str = 'mnist',
+        data_dir: str = '.',
+        mean: FloatOrFloats | None = None,
+        std: FloatOrFloats | None = None,
+        random_state: int = 42,
+        batch_size: int = 32,
+        num_workers: int = 0
+    ) -> None:
 
         super().__init__()
 
@@ -77,7 +83,7 @@ class MNISTDataModule(LightningDataModule):
         self.train_transform = transforms.Compose(train_transforms)
         self.test_transform = transforms.Compose(test_transforms)
 
-    def prepare_data(self):
+    def prepare_data(self) -> None:
         '''Download data.'''
 
         train_set = self.data_class(
@@ -92,7 +98,7 @@ class MNISTDataModule(LightningDataModule):
             download=True
         )
 
-    def setup(self, stage):
+    def setup(self, stage: str) -> None:
         '''Set up train/test/val. datasets.'''
 
         # create train/val. datasets
@@ -117,7 +123,7 @@ class MNISTDataModule(LightningDataModule):
                 transform=self.test_transform
             )
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         '''Create train dataloader.'''
         if hasattr(self, 'train_set'):
             return DataLoader(
@@ -131,7 +137,7 @@ class MNISTDataModule(LightningDataModule):
         else:
             raise AttributeError('Train set has not been set')
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         '''Create val. dataloader.'''
         if hasattr(self, 'val_set'):
             return DataLoader(
@@ -145,7 +151,7 @@ class MNISTDataModule(LightningDataModule):
         else:
             raise AttributeError('Val. set has not been set')
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         '''Create test dataloader.'''
         if hasattr(self, 'test_set'):
             return DataLoader(

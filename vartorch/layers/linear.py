@@ -53,13 +53,16 @@ class VarLinear(VarLayer):
 
     '''
 
-    def __init__(self,
-                 in_features,
-                 out_features,
-                 weight_std=1.0,
-                 bias_std=1.0,
-                 param_mode='log'):
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        weight_std: float = 1.0,
+        bias_std: float = 1.0,
+        param_mode: str = 'log'
+    ) -> None:
 
+        # initialize base layer with certain std. parametrization
         super().__init__(param_mode)
 
         # set attributes
@@ -80,7 +83,7 @@ class VarLinear(VarLayer):
         self.reset_parameters()
 
     # TODO: find optional initialization strategy
-    def reset_parameters(self):
+    def reset_parameters(self) -> None:
         '''Re-initialize the parameters.'''
 
         # initialize means of the weights like nn.Linear
@@ -89,7 +92,7 @@ class VarLinear(VarLayer):
         # initialize std. of the weights with the prior value
         torch.nn.init.constant_(
             self.w_sigma_param,
-            self.sigma_inverse(self.weight_std)
+            self.sigma_inverse(self.weight_std).item()
         )
 
         # initialize means of the bias terms with zeros
@@ -98,10 +101,10 @@ class VarLinear(VarLayer):
         # initialize std. of the bias terms with the prior value
         torch.nn.init.constant_(
             self.b_sigma_param,
-            self.sigma_inverse(self.bias_std)
+            self.sigma_inverse(self.bias_std).item()
         )
 
-    def forward(self, X):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
 
         # sample from q
         if self.sampling:
@@ -116,12 +119,13 @@ class VarLinear(VarLayer):
             w = self.w_mu
             b = self.b_mu
 
-        y = nn.functional.linear(X, w, b)
+        y = nn.functional.linear(x, w, b)
 
         # compute KL divergence
         if self.sampling:
             self.kl_acc = kl_div_dist(self.w_mu, w_sigma, self.weight_std) \
                         + kl_div_dist(self.b_mu, b_sigma, self.bias_std)
+
         # do not compute KL divergence
         else:
             self.kl_acc = torch.tensor(0.0, device=y.device)
@@ -145,51 +149,71 @@ class VarLinearWithUncertainLogits(VarLayer):
 
     '''
 
-    def __init__(self,
-                 in_features,
-                 out_features,
-                 weight_std=1.0,
-                 bias_std=1.0,
-                 param_mode='log'):
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        weight_std: float = 1.0,
+        bias_std: float = 1.0,
+        param_mode: str = 'log'
+    ) -> None:
 
+        # initialize base layer with a certain std. parametrization
         super().__init__(param_mode)
 
+        # create layer predicting the logit means
         self.logits_mu = VarLinear(
             in_features=in_features,
             out_features=out_features,
             weight_std=weight_std,
             bias_std=bias_std,
-            param_mode=param_mode
+            param_mode=self.parametrization # set parametrization for the linear layer predicting the logit means
 
         )
 
+        # create layer predicting the logit stds.
         self.logits_sigma_param = VarLinear(
             in_features=in_features,
             out_features=out_features,
             weight_std=weight_std,
             bias_std=bias_std,
-            param_mode=param_mode
+            param_mode=self.parametrization # set parametrization for the linear layer predicting the logit sigma params
         )
 
-        self.reparametrize = Reparametrize(param_mode=param_mode)
+        self.reparametrize = Reparametrize(param_mode=self.parametrization) # set parametrization for stds. of the logits
 
-    def epistemic(self):
+    def epistemic(self) -> None:
         '''Set epistemic mode.'''
+
+        # turn on weight sampling
         self.logits_mu.sampling = True
         self.logits_sigma_param.sampling = True
+
+        # turn off output sampling
         self.reparametrize.sampling = False
 
-    def aleatoric(self):
+    def aleatoric(self) -> None:
         '''Set aleatoric mode.'''
+
+        # turn off weight sampling
         self.logits_mu.sampling = False
         self.logits_sigma_param.sampling = False
+
+        # turn on output sampling
         self.reparametrize.sampling = True
 
-    def forward(self, X):
-        mu = self.logits_mu(X)
-        sigma_param = self.logits_sigma_param(X)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+
+        # compute mean
+        mu = self.logits_mu(x)
+
+        # compute standard deviation
+        sigma_param = self.logits_sigma_param(x)
         sigma = self.sigma(sigma_param)
+
+        # sample output
         y = self.reparametrize(mu, sigma)
+
         return y
 
 
@@ -209,36 +233,48 @@ class VarLinearWithLearnableTemperature(VarLayer):
 
     '''
 
-    def __init__(self,
-                 in_features,
-                 out_features,
-                 weight_std=1.0,
-                 bias_std=1.0,
-                 param_mode='log'):
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        weight_std: float = 1.0,
+        bias_std: float = 1.0,
+        param_mode: str = 'log'
+    ) -> None:
 
+        # initialize base layer with a certain std. parametrization
         super().__init__(param_mode)
 
+        # create layer predicting the logits
         self.logits = VarLinear(
             in_features=in_features,
             out_features=out_features,
             weight_std=weight_std,
             bias_std=bias_std,
-            param_mode=param_mode
+            param_mode=self.parametrization # set parametrization for the linear layer predicting the logits
         )
 
+        # create layer predicting the log-temperature
         self.logtemp = VarLinear(
             in_features=in_features,
             out_features=1,
             weight_std=weight_std,
             bias_std=bias_std,
-            param_mode=param_mode
+            param_mode=self.parametrization # set parametrization for the linear layer predicting the log-temperature
         )
 
-    def forward(self, X):
-        logits = self.logits(X)
-        logtemp = self.logtemp(X)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+
+        # compute logits
+        logits = self.logits(x)
+
+        # compute temperature
+        logtemp = self.logtemp(x)
         temp = torch.exp(logtemp)
         # temp = 1 + torch.exp(logtemp)
+
+        # scale logits
         y = logits / temp
+
         return y
 

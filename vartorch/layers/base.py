@@ -37,7 +37,7 @@ class VarLayer(nn.Module):
 
     '''
 
-    def __init__(self, param_mode='log'):
+    def __init__(self, param_mode: str = 'log') -> None:
         super().__init__()
 
         # set parametrization
@@ -46,16 +46,13 @@ class VarLayer(nn.Module):
         # set initial sampling mode
         self.sampling = True
 
-    def forward(self, x):
-        raise NotImplementedError()
-
     @property
-    def parametrization(self):
+    def parametrization(self) -> str:
         '''Get parametrization mode.'''
         return self._parametrization
 
     @parametrization.setter
-    def parametrization(self, param_mode):
+    def parametrization(self, param_mode: str) -> None:
         '''Set parametrization mode.'''
 
         # set parametrization type
@@ -74,12 +71,12 @@ class VarLayer(nn.Module):
             self.sigma_inverse = rho_from_sigma
 
     @property
-    def sampling(self):
+    def sampling(self) -> bool:
         '''Get sampling mode.'''
         return self._sampling
 
     @sampling.setter
-    def sampling(self, sample_mode):
+    def sampling(self, sample_mode: bool):
         '''Set sampling mode.'''
         self._sampling = sample_mode
 

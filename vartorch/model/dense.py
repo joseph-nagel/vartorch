@@ -1,22 +1,27 @@
 '''Dense models.'''
 
+from typing import Any
+from collections.abc import Sequence
+
 import torch.nn as nn
 
-from ..layers import make_dense
+from ..layers import ActivType, make_dense
 
 
 class DenseBlock(nn.Sequential):
     '''Multiple (serial) dense layers.'''
 
-    def __init__(self,
-                 num_features,
-                 batchnorm=False,
-                 activation='leaky_relu',
-                 last_activation=None,
-                 normalize_last=False,
-                 drop_rate=None,
-                 variational=False,
-                 var_opts={}):
+    def __init__(
+        self,
+        num_features: Sequence[int],
+        batchnorm: bool = False,
+        activation: ActivType | None = 'leaky_relu',
+        last_activation: ActivType | None = None,
+        normalize_last: bool = False,
+        drop_rate: float | None = None,
+        variational: bool = False,
+        var_opts: dict[str, Any] = {}
+    ):
 
         # determine last activation
         if last_activation == 'same':
@@ -29,7 +34,8 @@ class DenseBlock(nn.Sequential):
             raise ValueError('Number of features needs at least two entries')
 
         # assemble layers
-        layers = []
+        layers = [] # type: list[nn.Module]
+
         for idx, (in_features, out_features) in enumerate(zip(num_features[:-1], num_features[1:])):
             is_not_last = (idx < num_layers - 1)
 

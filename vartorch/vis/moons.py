@@ -5,11 +5,13 @@ import numpy as np
 import torch
 
 
-def plot_data_2d(X,
-                 y,
-                 labels=None,
-                 colors=None,
-                 ax=None):
+def plot_data_2d(
+    X,
+    y,
+    labels=None,
+    colors=None,
+    ax=None
+):
     '''Plot data points with labels on a two-dim. plane.'''
 
     if ax is None:
@@ -39,12 +41,14 @@ def plot_data_2d(X,
         return fig, ax
 
 
-def plot_function_2d(function,
-                     levels=(0.1, 0.3, 0.5, 0.7, 0.9),
-                     x_limits=None,
-                     y_limits=None,
-                     colorbar=True,
-                     ax=None):
+def plot_function_2d(
+    function,
+    levels=(0.1, 0.3, 0.5, 0.7, 0.9),
+    x_limits=None,
+    y_limits=None,
+    colorbar=True,
+    ax=None
+):
     '''Plot a function of two features on the plane.'''
 
     if ax is None:
@@ -101,14 +105,16 @@ def plot_function_2d(function,
         return fig, ax
 
 
-def plot_data_and_preds_2d(x_data,
-                           y_data,
-                           pred_function,
-                           figsize=(6, 4.5),
-                           xlim=(-2, 3),
-                           ylim=(-2, 2.5),
-                           levels=(0.3, 0.5, 0.7),
-                           title='Data and predictions'):
+def plot_data_and_preds_2d(
+    x_data,
+    y_data,
+    pred_function,
+    figsize=(6, 4.5),
+    xlim=(-2, 3),
+    ylim=(-2, 2.5),
+    levels=(0.3, 0.5, 0.7),
+    title='Data and predictions'
+):
     '''Plot data and predictions.'''
 
     fig, ax = plt.subplots(figsize=figsize)

@@ -1,26 +1,35 @@
 '''Conv. models.'''
 
+from collections.abc import Sequence
+
 import torch.nn as nn
 
-from ..layers import SingleConv, DoubleConv
+from ..layers import (
+    IntOrInts,
+    ActivType,
+    SingleConv,
+    DoubleConv
+)
 
 
 class ConvDown(nn.Sequential):
     '''Convolutions with downsampling.'''
 
-    def __init__(self,
-                 num_channels,
-                 kernel_size=3,
-                 padding='same',
-                 stride=1,
-                 pooling=2,
-                 batchnorm=False,
-                 activation='leaky_relu',
-                 last_activation='same',
-                 normalize_last=True,
-                 pool_last=True,
-                 double_conv=False,
-                 inout_first=True):
+    def __init__(
+        self,
+        num_channels: Sequence[int],
+        kernel_size: IntOrInts = 3,
+        padding: IntOrInts | str = 'same',
+        stride: IntOrInts = 1,
+        pooling: int | None = 2,
+        batchnorm: bool = False,
+        activation: ActivType | None = 'leaky_relu',
+        last_activation: ActivType | None = 'same',
+        normalize_last: bool = True,
+        pool_last: bool = True,
+        double_conv: bool = False,
+        inout_first: bool = True
+    ) -> None:
 
         # determine conv type
         ConvType = DoubleConv if double_conv else SingleConv
@@ -39,7 +48,8 @@ class ConvDown(nn.Sequential):
             raise ValueError('Number of channels needs at least two entries')
 
         # assemble layers
-        layers = []
+        layers = [] # type: list[nn.Module]
+
         for idx, (in_channels, out_channels) in enumerate(zip(num_channels[:-1], num_channels[1:])):
             is_not_last = (idx < num_layers - 1)
 

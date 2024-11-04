@@ -6,13 +6,15 @@ import torch
 import torch.distributions as dist
 
 
-def plot_point_predictions(images,
-                           probs,
-                           labels=None,
-                           names=None,
-                           nrows=3,
-                           figsize=(5, 6),
-                           title='Point predictions'):
+def plot_point_predictions(
+    images,
+    probs,
+    labels=None,
+    names=None,
+    nrows=3,
+    figsize=(5, 6),
+    title='Point predictions'
+):
     '''Plot point predictions.'''
 
     entropy = dist.Categorical(probs=probs).entropy() # compute entropy from probabilities
@@ -42,13 +44,15 @@ def plot_point_predictions(images,
     return fig, axes
 
 
-def plot_post_predictions(images,
-                          sampled_probs,
-                          labels=None,
-                          names=None,
-                          nrows=3,
-                          figsize=(8, 6),
-                          title='Posterior predictions'):
+def plot_post_predictions(
+    images,
+    sampled_probs,
+    labels=None,
+    names=None,
+    nrows=3,
+    figsize=(8, 6),
+    title='Posterior predictions'
+):
     '''Plot posterior predictions.'''
 
     probs = torch.mean(sampled_probs, axis=-1) # compute probabilities from samples
@@ -97,13 +101,14 @@ def plot_post_predictions(images,
     return fig, axes
 
 
-def plot_entropy_histograms(norm_entropy,
-                            anom_entropy,
-                            figsize=(6, 4),
-                            range=(0, 2),
-                            bins=100,
-                            title='Predictions'
-                            ):
+def plot_entropy_histograms(
+    norm_entropy,
+    anom_entropy,
+    figsize=(6, 4),
+    range=(0, 2),
+    bins=100,
+    title='Predictions'
+):
     '''Plot entropy histograms.'''
 
     fig, ax = plt.subplots(figsize=figsize)

@@ -7,11 +7,13 @@ from torch.utils.data import DataLoader, TensorDataset
 from lightning import LightningDataModule
 
 
-def make_half_moons(num_samples,
-                    noise_level=0.15,
-                    offsets=(0.15, -0.15),
-                    random_state=None,
-                    test_size=None):
+def make_half_moons(
+    num_samples: int,
+    noise_level: float = 0.15,
+    offsets: tuple[float, float] = (0.15, -0.15),
+    random_state: int | None = None,
+    test_size: int | float | None = None
+):
     '''
     Create half-moons data.
 
@@ -86,15 +88,17 @@ class MoonsDataModule(LightningDataModule):
 
     '''
 
-    def __init__(self,
-                 num_train,
-                 num_val=0,
-                 num_test=0,
-                 noise_level=0.15,
-                 offsets=(0.15, -0.15),
-                 random_state=42,
-                 batch_size=32,
-                 num_workers=0):
+    def __init__(
+        self,
+        num_train: int,
+        num_val: int = 0,
+        num_test: int = 0,
+        noise_level: float = 0.15,
+        offsets: tuple[float, float] = (0.15, -0.15),
+        random_state: int | None = 42,
+        batch_size: int = 32,
+        num_workers: int = 0
+    ) -> None:
 
         super().__init__()
 
@@ -112,7 +116,7 @@ class MoonsDataModule(LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
 
-    def prepare_data(self):
+    def prepare_data(self) -> None:
         '''Prepare numerical data.'''
 
         # create data
@@ -131,30 +135,30 @@ class MoonsDataModule(LightningDataModule):
         self.y = torch.tensor(y, dtype=torch.int64)
 
     @property
-    def x_train(self):
+    def x_train(self) -> torch.Tensor:
         return self.x[:self.num_train]
 
     @property
-    def y_train(self):
+    def y_train(self) -> torch.Tensor:
         return self.y[:self.num_train]
 
     @property
-    def x_val(self):
+    def x_val(self) -> torch.Tensor:
         return self.x[self.num_train:self.num_train+self.num_val]
 
     @property
-    def y_val(self):
+    def y_val(self) -> torch.Tensor:
         return self.y[self.num_train:self.num_train+self.num_val]
 
     @property
-    def x_test(self):
+    def x_test(self) -> torch.Tensor:
         return self.x[self.num_train+self.num_val:]
 
     @property
-    def y_test(self):
+    def y_test(self) -> torch.Tensor:
         return self.y[self.num_train+self.num_val:]
 
-    def setup(self, stage):
+    def setup(self, stage: str) -> None:
         '''Set up train/test/val. datasets.'''
 
         # create train/val. datasets
@@ -166,7 +170,7 @@ class MoonsDataModule(LightningDataModule):
         elif stage == 'test':
             self.test_set = TensorDataset(self.x_test, self.y_test)
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         '''Create train dataloader.'''
         if hasattr(self, 'train_set'):
             return DataLoader(
@@ -180,7 +184,7 @@ class MoonsDataModule(LightningDataModule):
         else:
             raise AttributeError('Train set has not been set')
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         '''Create val. dataloader.'''
         if hasattr(self, 'val_set'):
             return DataLoader(
@@ -194,7 +198,7 @@ class MoonsDataModule(LightningDataModule):
         else:
             raise AttributeError('Val. set has not been set')
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         '''Create test dataloader.'''
         if hasattr(self, 'test_set'):
             return DataLoader(
