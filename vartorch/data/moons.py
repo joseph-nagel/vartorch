@@ -23,11 +23,11 @@ def make_half_moons(
         Number of samples to create.
     noise_level : float
         Noise standard deviation.
-    offsets : tuple
+    offsets : (float, float)
         Class-specific offsets.
-    random_state : int
+    random_state : int or None
         Random generator seed.
-    test_size : int or float
+    test_size : int, float or None
         Test size parameter.
 
     '''
@@ -77,9 +77,9 @@ class MoonsDataModule(LightningDataModule):
         Number of testing samples.
     noise_level : float
         Noise standard deviation.
-    offsets : tuple
+    offsets : (float, float)
         Offsets applied to the data.
-    random_state : int
+    random_state : int or None
         Random generator seed.
     batch_size : int
         Batch size of the data loader.

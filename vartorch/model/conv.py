@@ -21,7 +21,7 @@ class ConvDown(nn.Sequential):
         kernel_size: IntOrInts = 3,
         padding: IntOrInts | str = 'same',
         stride: IntOrInts = 1,
-        pooling: int | None = 2,
+        pooling: IntOrInts | None = 2,
         batchnorm: bool = False,
         activation: ActivType | None = 'leaky_relu',
         last_activation: ActivType | None = 'same',

@@ -17,11 +17,11 @@ class DenseVarClassifier(VarClassifier):
         Feature numbers for dense layers.
     batchnorm : bool
         Determines whether batchnorm is used.
-    activation : None or str
+    activation : str or None
         Nonlinearity type.
-    last_activation : None or str
+    last_activation : str or None
         Nonlinearity of the final layer.
-    drop_rate : float
+    drop_rate : float or None
         Dropout probability.
     weight_std : float
         Prior std. of the weights.

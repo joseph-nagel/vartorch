@@ -19,17 +19,17 @@ class ConvVarClassifier(VarClassifier):
         Channel numbers for conv. layers.
     num_features : list
         Feature numbers for dense layers.
-    kernel_size : int
+    kernel_size : int or (int, int)
         Conv. kernel size.
-    pooling : int
+    pooling : int, (int, int) or None
         Pooling parameter.
     batchnorm : bool
         Determines whether batchnorm is used.
-    activation : str
+    activation : str or None
         Nonlinearity type.
-    last_activation : str
+    last_activation : str or None
         Nonlinearity of the final layer.
-    drop_rate : float
+    drop_rate : float or None
         Dropout probability for dense layers.
     pool_last : bool
         Controls the last pooling operation (also first upscaling).
@@ -56,7 +56,7 @@ class ConvVarClassifier(VarClassifier):
         num_channels: Sequence[int],
         num_features: Sequence[int],
         kernel_size: IntOrInts = 3,
-        pooling: int | None = 2,
+        pooling: IntOrInts | None = 2,
         batchnorm: bool = False,
         activation: ActivType | None = 'leaky_relu',
         last_activation: ActivType | None = None,

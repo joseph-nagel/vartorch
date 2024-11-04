@@ -20,9 +20,9 @@ class MNISTDataModule(LightningDataModule):
         Determines the MNIST-like dataset.
     data_dir : str
         Directory for storing the data.
-    mean : float
+    mean : float, (float, float, float) or None
         Mean for data normalization.
-    std : float
+    std : float, (float, float, float) or None
         Standard deviation for normalization.
     random_state : int
         Random generator seed.
