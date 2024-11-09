@@ -12,6 +12,12 @@ Only classification problems can be addressed at this point.
 Another limitation is that the variational distribution, which acts as a parametric posterior approximation,
 is restricted to a multivariate Gaussian with a diagonal covariance matrix.
 
+## Notebooks
+
+- [Half-moons example](notebooks/moons.ipynb)
+
+- [MNIST example](notebooks/mnist.ipynb)
+
 ## Installation
 
 ```
@@ -27,10 +33,4 @@ python scripts/main.py fit --config config/moons.yaml
 ```
 python scripts/main.py fit --config config/mnist.yaml
 ```
-
-## Notebooks
-
-- [Half-moons example](notebooks/moons.ipynb)
-
-- [MNIST example](notebooks/mnist.ipynb)
 
