@@ -6,10 +6,6 @@ from torchvision import datasets, transforms
 from lightning import LightningDataModule
 
 
-# define type alias
-FloatOrFloats = float | tuple[float, float, float]
-
-
 class MNISTDataModule(LightningDataModule):
     '''
     DataModule for MNIST-like datasets.
@@ -20,9 +16,9 @@ class MNISTDataModule(LightningDataModule):
         Determines the MNIST-like dataset.
     data_dir : str
         Directory for storing the data.
-    mean : float, (float, float, float) or None
+    mean : float or None
         Mean for data normalization.
-    std : float, (float, float, float) or None
+    std : float or None
         Standard deviation for normalization.
     random_state : int
         Random generator seed.
@@ -37,8 +33,8 @@ class MNISTDataModule(LightningDataModule):
         self,
         data_set: str = 'mnist',
         data_dir: str = '.',
-        mean: FloatOrFloats | None = None,
-        std: FloatOrFloats | None = None,
+        mean: float | None = None,
+        std: float | None = None,
         random_state: int = 42,
         batch_size: int = 32,
         num_workers: int = 0
