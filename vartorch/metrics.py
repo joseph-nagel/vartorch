@@ -26,6 +26,7 @@ import torch.distributions as dist
 from torch.utils.data import DataLoader
 
 
+# TODO: change output to tensor
 def anomaly_score(
     model: nn.Module,
     data_loader: DataLoader,
@@ -103,6 +104,7 @@ def _maxprob_score(top_prob: torch.Tensor) -> torch.Tensor:
     return 1 - top_prob
 
 
+# TODO: change output to tensors
 def calibration_metrics(
     model: nn.Module,
     data_loader: DataLoader,
@@ -186,6 +188,7 @@ def calibration_metrics(
     return conf_edges, binned_acc, ce_dict
 
 
+# TODO: change inputs and outputs to tensors
 def _calibration_errors(
     binned_conf: np.ndarray,
     binned_acc: np.ndarray,
