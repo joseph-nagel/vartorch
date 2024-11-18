@@ -9,6 +9,9 @@ In particular, it comes with a parametrization mode and a sampling switch.
 
 '''
 
+from abc import ABC, abstractmethod
+
+import torch
 import torch.nn as nn
 
 from ..reparam import (
@@ -19,7 +22,7 @@ from ..reparam import (
 )
 
 
-class VarLayer(nn.Module):
+class VarLayer(nn.Module, ABC):
     '''
     Variational layer base class.
 
@@ -38,6 +41,7 @@ class VarLayer(nn.Module):
     '''
 
     def __init__(self, param_mode: str = 'log') -> None:
+
         super().__init__()
 
         # set parametrization
@@ -45,6 +49,10 @@ class VarLayer(nn.Module):
 
         # set initial sampling mode
         self.sampling = True
+
+    @abstractmethod
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        raise NotImplementedError
 
     @property
     def parametrization(self) -> str:
