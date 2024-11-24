@@ -71,13 +71,21 @@ class MNISTDataModule(LightningDataModule):
         test_transforms = [transforms.ToTensor()]
 
         if (mean is not None) and (std is not None):
-            normalize_fn = transforms.Normalize(mean=mean, std=std)
+            normalize = transforms.Normalize(mean=mean, std=std)
 
-            train_transforms.append(normalize_fn)
-            test_transforms.append(normalize_fn)
+            train_transforms.append(normalize)
+            test_transforms.append(normalize)
 
         self.train_transform = transforms.Compose(train_transforms)
         self.test_transform = transforms.Compose(test_transforms)
+
+        # create inverse normalization
+        if (mean is not None) and (std is not None):
+
+            self.renormalize = transforms.Compose([
+                transforms.Lambda(lambda x: x * std + mean), # reverse normalization
+                transforms.Lambda(lambda x: x.clamp(0, 1)) # clip to valid range
+            ])
 
     def prepare_data(self) -> None:
         '''Download data.'''
@@ -121,6 +129,7 @@ class MNISTDataModule(LightningDataModule):
 
     def train_dataloader(self) -> DataLoader:
         '''Create train dataloader.'''
+
         if hasattr(self, 'train_set'):
             return DataLoader(
                 self.train_set,
@@ -135,6 +144,7 @@ class MNISTDataModule(LightningDataModule):
 
     def val_dataloader(self) -> DataLoader:
         '''Create val. dataloader.'''
+
         if hasattr(self, 'val_set'):
             return DataLoader(
                 self.val_set,
@@ -149,6 +159,7 @@ class MNISTDataModule(LightningDataModule):
 
     def test_dataloader(self) -> DataLoader:
         '''Create test dataloader.'''
+
         if hasattr(self, 'test_set'):
             return DataLoader(
                 self.test_set,
