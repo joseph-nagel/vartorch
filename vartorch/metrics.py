@@ -260,10 +260,10 @@ def _extract_predict(
             else:
                 batch_logits = model(x_batch)
 
-                if batch_logits.shape[-1] == 1: # binary classifier
+                if batch_logits.shape[-1] == 1:  # binary classifier
                     batch_probs = torch.sigmoid(batch_logits)
 
-                else: # multi-class classifier
+                else:  # multi-class classifier
                     batch_probs = torch.softmax(batch_logits, dim=-1)
 
             labels_list.append(y_batch)
@@ -273,11 +273,11 @@ def _extract_predict(
     probs = torch.cat(probs_list, dim=0)
 
     # get top class and probability
-    if probs.shape[-1] == 1: # binary classifier
+    if probs.shape[-1] == 1:  # binary classifier
         top_class = (probs >= threshold).int()
         top_prob = torch.where(top_class==1, probs, 1 - probs)
 
-    else: # multi-class classifier
+    else:  # multi-class classifier
         top_prob, top_class = torch.topk(probs, k=1, dim=1)
 
     return labels, probs, top_class, top_prob

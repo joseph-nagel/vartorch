@@ -127,7 +127,7 @@ class VarClassifier(LightningModule):
         per_layer = []
 
         for layer in self.model.modules():
-            if isinstance(layer, VarLayer): # if hasattr(layer, 'sampling'):
+            if isinstance(layer, VarLayer):  # if hasattr(layer, 'sampling'):
                 per_layer.append(layer.sampling)
 
         # determine global sampling mode
@@ -153,7 +153,7 @@ class VarClassifier(LightningModule):
 
         # set sampling mode for all model layers
         for layer in self.model.modules():
-            if isinstance(layer, VarLayer): # if hasattr(layer, 'sampling'):
+            if isinstance(layer, VarLayer):  # if hasattr(layer, 'sampling'):
                 layer.sampling = sample_mode
 
     def sample(self, sample_mode: bool = True) -> Self:
@@ -314,7 +314,7 @@ class VarClassifier(LightningModule):
         # loop over samples
         for _ in range(num_samples):
 
-            out = self.ll(x, y, return_preds=return_preds) # during the LL computation also the KL terms are calculated
+            out = self.ll(x, y, return_preds=return_preds)  # during the LL computation also the KL terms are calculated
 
             if return_preds:
                 ll_sample, logits_sample = out
@@ -323,7 +323,7 @@ class VarClassifier(LightningModule):
                 ll_sample = out
 
             ll = ll + ll_sample
-            kl = kl + self.kl() # the KL terms can be aggregated after the LL computation
+            kl = kl + self.kl()  # the KL terms can be aggregated after the LL computation
 
         # average over samples
         ll = ll / num_samples
@@ -420,14 +420,14 @@ class VarClassifier(LightningModule):
             y_batch,
             num_samples=self.num_samples,
             total_size=len(self.trainer.train_dataloader.dataset),
-            reweight_ll=True, # up-weight LL so as to estimate the full dataset loss (batches can be better compared)
+            reweight_ll=True,  # up-weight LL so as to estimate the full dataset loss (batches can be better compared)
             return_preds=True
         )
 
         _ = self.train_acc(probs.squeeze(), y_batch)
 
-        self.log('train_loss', loss.item()) # Lightning logs batch-wise scalars during training per default
-        self.log('train_acc', self.train_acc) # the same applies to torchmetrics.Metric objects
+        self.log('train_loss', loss.item())  # Lightning logs batch-wise scalars during training per default
+        self.log('train_acc', self.train_acc)  # the same applies to torchmetrics.Metric objects
 
         return loss
 
@@ -444,14 +444,14 @@ class VarClassifier(LightningModule):
             y_batch,
             num_samples=self.num_samples,
             total_size=len(self.trainer.val_dataloaders.dataset),
-            reweight_ll=True, # up-weight LL so as to estimate the full dataset loss (can be averaged)
+            reweight_ll=True,  # up-weight LL so as to estimate the full dataset loss (can be averaged)
             return_preds=True
         )
 
         _ = self.val_acc(probs.squeeze(), y_batch)
 
-        self.log('val_loss', loss.item()) # Lightning automatically averages scalars over batches for validation
-        self.log('val_acc', self.val_acc) # the batch size is considered when logging torchmetrics.Metric objects
+        self.log('val_loss', loss.item())  # Lightning automatically averages scalars over batches for validation
+        self.log('val_acc', self.val_acc)  # the batch size is considered when logging torchmetrics.Metric objects
 
         return loss
 
@@ -466,27 +466,27 @@ class VarClassifier(LightningModule):
         loss, probs = self.loss(
             x_batch,
             y_batch,
-            num_samples=1, # use a single sample (mean value), since sampling is off while testing
+            num_samples=1,  # use a single sample (mean value), since sampling is off while testing
             total_size=len(self.trainer.test_dataloaders.dataset),
-            reweight_ll=True, # up-weight LL so as to estimate the full dataset loss (can be averaged)
+            reweight_ll=True,  # up-weight LL so as to estimate the full dataset loss (can be averaged)
             return_preds=True
         )
 
         _ = self.test_acc(probs.squeeze(), y_batch)
 
-        self.log('test_loss', loss.item()) # Lightning automatically averages scalars over batches for testing
-        self.log('test_acc', self.test_acc) # the batch size is considered when logging torchmetrics.Metric objects
+        self.log('test_loss', loss.item())  # Lightning automatically averages scalars over batches for testing
+        self.log('test_acc', self.test_acc)  # the batch size is considered when logging torchmetrics.Metric objects
 
         return loss
 
     def on_train_epoch_start(self) -> None:
-        self.sample(True) # turn on sampling for training
+        self.sample(True)  # turn on sampling for training
 
     def on_validation_epoch_start(self) -> None:
-        self.sample(True) # turn on sampling for validation
+        self.sample(True)  # turn on sampling for validation
 
     def on_test_epoch_start(self) -> None:
-        self.sample(False) # turn off sampling for testing
+        self.sample(False)  # turn off sampling for testing
 
     def configure_optimizers(
         self
@@ -506,9 +506,9 @@ class VarClassifier(LightningModule):
         )
 
         # lr_config = {
-        #     'scheduler': lr_scheduler, # LR scheduler
-        #     'interval': 'epoch', # time unit
-        #     'frequency': 1 # update frequency
+        #     'scheduler': lr_scheduler,  # LR scheduler
+        #     'interval': 'epoch',  # time unit
+        #     'frequency': 1  # update frequency
         # }
 
         return [optimizer], [lr_scheduler]

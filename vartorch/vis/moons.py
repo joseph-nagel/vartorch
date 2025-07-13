@@ -121,7 +121,7 @@ def plot_data_and_preds_2d(
 
     plot_data_2d(x_data, y_data, colors=(plt.cm.Set1(1), plt.cm.Set1(0)), ax=ax)
 
-    ax.set(xlim=xlim, ylim=ylim) # set limits before 2D function is plotted
+    ax.set(xlim=xlim, ylim=ylim)  # set limits before 2D function is plotted
 
     plot_function_2d(pred_function, levels=levels, ax=ax)
 
@@ -138,7 +138,7 @@ def point_prediction(model, x):
     '''Compute normal point predictions.'''
     x_tensor = torch.tensor(x, dtype=torch.float32)
 
-    model.train(False) # turn off train mode
+    model.train(False)  # turn off train mode
 
     point_logits = model.predict(x_tensor.to(model.device))
     point_probs = torch.sigmoid(point_logits).cpu().numpy()
@@ -150,8 +150,8 @@ def post_mean(var_model, x):
     '''Predict with posterior mean weights.'''
     x_tensor = torch.tensor(x, dtype=torch.float32)
 
-    var_model.train(False) # turn off train mode
-    var_model.sample(False) # turn off sampling
+    var_model.train(False)  # turn off train mode
+    var_model.sample(False)  # turn off sampling
 
     point_logits = var_model.predict(x_tensor.to(var_model.device))
     point_probs = torch.sigmoid(point_logits).cpu().numpy()
@@ -163,8 +163,8 @@ def post_predictive(var_model, x, num_samples=100):
     '''Predict according to the posterior predictive distribution.'''
     x_tensor = torch.tensor(x, dtype=torch.float32)
 
-    var_model.train(False) # turn off train mode
-    var_model.sample(True) # turn on sampling
+    var_model.train(False)  # turn off train mode
+    var_model.sample(True)  # turn on sampling
 
     sampled_logits = var_model.predict(x_tensor.to(var_model.device), num_samples)
     sampled_probs = torch.sigmoid(sampled_logits)
@@ -178,8 +178,8 @@ def post_uncertainty(var_model, x, num_samples=100):
     '''Compute the uncertainty associated with the posterior predictive.'''
     x_tensor = torch.tensor(x, dtype=torch.float32)
 
-    var_model.train(False) # turn off train mode
-    var_model.sample(True) # turn on sampling
+    var_model.train(False)  # turn off train mode
+    var_model.sample(True)  # turn on sampling
 
     sampled_logits = var_model.predict(x_tensor.to(var_model.device), num_samples)
     sampled_probs = torch.sigmoid(sampled_logits)

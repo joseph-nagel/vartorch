@@ -29,8 +29,8 @@ def kl_div_dist(
 ) -> torch.Tensor:
     '''Compute the KL divergence with PyTorch distributions.'''
 
-    q = dist.Normal(q_mu, q_sigma) # variational distribution
-    p = dist.Normal(0, p_sigma) # prior distribution
+    q = dist.Normal(q_mu, q_sigma)  # variational distribution
+    p = dist.Normal(0, p_sigma)  # prior distribution
 
     kl = dist.kl_divergence(q, p).sum()
 

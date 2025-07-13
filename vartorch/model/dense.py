@@ -34,7 +34,7 @@ class DenseBlock(nn.Sequential):
             raise ValueError('Number of features needs at least two entries')
 
         # assemble layers
-        layers = [] # type: list[nn.Module]
+        layers = []  # type: list[nn.Module]
 
         for idx, (in_features, out_features) in enumerate(zip(num_features[:-1], num_features[1:])):
             is_not_last = (idx < num_layers - 1)

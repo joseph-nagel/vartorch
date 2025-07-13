@@ -17,9 +17,9 @@ def plot_point_predictions(
 ):
     '''Plot point predictions.'''
 
-    entropy = dist.Categorical(probs=probs).entropy() # compute entropy from probabilities
+    entropy = dist.Categorical(probs=probs).entropy()  # compute entropy from probabilities
 
-    num_classes = probs.shape[-1] # get number of classes
+    num_classes = probs.shape[-1]  # get number of classes
 
     fig, axes = plt.subplots(nrows=nrows, ncols=2, figsize=figsize)
 
@@ -55,10 +55,10 @@ def plot_post_predictions(
 ):
     '''Plot posterior predictions.'''
 
-    probs = torch.mean(sampled_probs, axis=-1) # compute probabilities from samples
-    entropy = dist.Categorical(probs=probs).entropy() # compute entropy from probabilities
+    probs = torch.mean(sampled_probs, axis=-1)  # compute probabilities from samples
+    entropy = dist.Categorical(probs=probs).entropy()  # compute entropy from probabilities
 
-    num_classes = probs.shape[-1] # get number of classes
+    num_classes = probs.shape[-1]  # get number of classes
 
     fig, axes = plt.subplots(nrows=nrows, ncols=3, figsize=figsize)
 

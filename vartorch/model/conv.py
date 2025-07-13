@@ -48,7 +48,7 @@ class ConvDown(nn.Sequential):
             raise ValueError('Number of channels needs at least two entries')
 
         # assemble layers
-        layers = [] # type: list[nn.Module]
+        layers = []  # type: list[nn.Module]
 
         for idx, (in_channels, out_channels) in enumerate(zip(num_channels[:-1], num_channels[1:])):
             is_not_last = (idx < num_layers - 1)

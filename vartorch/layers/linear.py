@@ -167,7 +167,7 @@ class VarLinearWithUncertainLogits(VarLayer):
             out_features=out_features,
             weight_std=weight_std,
             bias_std=bias_std,
-            param_mode=self.parametrization # set parametrization for the linear layer predicting the logit means
+            param_mode=self.parametrization  # set parametrization for the linear layer predicting the logit means
 
         )
 
@@ -177,10 +177,10 @@ class VarLinearWithUncertainLogits(VarLayer):
             out_features=out_features,
             weight_std=weight_std,
             bias_std=bias_std,
-            param_mode=self.parametrization # set parametrization for the linear layer predicting the logit sigma params
+            param_mode=self.parametrization  # set parametrization for the linear layer predicting the logit sigma params
         )
 
-        self.reparametrize = Reparametrize(param_mode=self.parametrization) # set parametrization for stds. of the logits
+        self.reparametrize = Reparametrize(param_mode=self.parametrization)  # set parametrization for stds. of the logits
 
     def epistemic(self) -> None:
         '''Set epistemic mode.'''
@@ -251,7 +251,7 @@ class VarLinearWithLearnableTemperature(VarLayer):
             out_features=out_features,
             weight_std=weight_std,
             bias_std=bias_std,
-            param_mode=self.parametrization # set parametrization for the linear layer predicting the logits
+            param_mode=self.parametrization  # set parametrization for the linear layer predicting the logits
         )
 
         # create layer predicting the log-temperature
@@ -260,7 +260,7 @@ class VarLinearWithLearnableTemperature(VarLayer):
             out_features=1,
             weight_std=weight_std,
             bias_std=bias_std,
-            param_mode=self.parametrization # set parametrization for the linear layer predicting the log-temperature
+            param_mode=self.parametrization  # set parametrization for the linear layer predicting the log-temperature
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
