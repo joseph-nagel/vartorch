@@ -2,9 +2,6 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["vartorch"]
-
 [project]
 name = "vartorch"
 version = "0.0.1"
