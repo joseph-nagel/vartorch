@@ -6,14 +6,14 @@ Summary
 This module provides different implementations of the KL divergence.
 Only diagonal Gaussian distributions are supported at the moment.
 
-The function 'kl_div_dist' calculates the KL divergence
+The function `kl_div_dist` calculates the KL divergence
 based on the native PyTorch distribution implementation.
 It assumes Gaussians with arbitrary diagonal covariances.
 
-Similarly, 'kl_div_analytical' is an analytical version for the case
+Similarly, `kl_div_analytical` is an analytical version for the case
 that the covariance of the prior distribution is an identity matrix.
 
-A single-sample Monte Carlo estimate can be computed 'kl_div_montecarlo'.
+A single-sample Monte Carlo estimate can be computed `kl_div_montecarlo`.
 It can be used in conjunction with black-box variational inference schemes.
 
 '''

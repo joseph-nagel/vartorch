@@ -3,13 +3,13 @@ Analysis tools.
 
 Summary
 -------
-The function 'anomaly_score' computes a score for each data item
+The function `anomaly_score` computes a score for each data item
 which can be utilized to identify anomalous/out-of-distribution inputs.
 For instance, the entropy of the predicted Bernoulli (binary classification)
 or categorical (multi-class problem) distribution might act as such a score.
 One can also take one minus the top class probability as a simple score.
 
-The function 'calibration_metrics' computes the classification
+The function `calibration_metrics` computes the classification
 accuracies over a whole data set for binned values of the confidence.
 This establishes the basis for the reliability diagram and its associated
 calibration metrics such as the expected or maximum calibration error.

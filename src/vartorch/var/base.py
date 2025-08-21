@@ -3,7 +3,7 @@ Variational classifier.
 
 Summary
 -------
-The core class 'VarClassifier' implements a scheme for
+The core class `VarClassifier` implements a scheme for
 stochastic variational inference in classification problems.
 It turns models with variational and other layers into Bayesian classifiers.
 While the likelihood determines whether the problem is binary or multi-class,
@@ -49,11 +49,11 @@ class VarClassifier(LightningModule):
     When sampling is turned on, the model predicts with weights
     that are randomly drawn from the variational distribution.
     When turned off, however, the weights assume their mean value.
-    The 'predict'-method therefore has a context-dependent behavior.
+    The `predict`-method therefore has a context-dependent behavior.
 
     Sampling has to be manually turned on (or off) for the loss simulation.
     Some high-level methods automatically use the appropriate sampling mode.
-    An example is 'predict_proba' which computes posterior pred. probabilities with
+    An example is `predict_proba` which computes posterior pred. probabilities with
     sampling (num_samples>1) and mean weight probabilities without (num_samples=1).
 
     Parameters

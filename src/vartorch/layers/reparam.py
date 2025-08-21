@@ -3,7 +3,7 @@ Reparametrization trick.
 
 Summary
 -------
-'Reparametrize' implements the reparametrization trick for the MC estimation of the ELBO.
+`Reparametrize` implements the reparametrization trick for the MC estimation of the ELBO.
 It can be used as component for building advanced layers.
 
 '''
