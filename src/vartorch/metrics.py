@@ -286,4 +286,3 @@ def _extract_predict(
 def _make_array(tensor: torch.Tensor) -> np.ndarray:
     '''Transform tensor into array.'''
     return tensor.detach().cpu().numpy()
-

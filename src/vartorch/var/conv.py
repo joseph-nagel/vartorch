@@ -143,4 +143,3 @@ class ConvVarClassifier(VarClassifier):
 
         # store hyperparams
         self.save_hyperparameters(logger=True)
-

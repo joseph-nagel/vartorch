@@ -38,4 +38,3 @@ from .utils import (
     SingleConv,
     DoubleConv
 )
-

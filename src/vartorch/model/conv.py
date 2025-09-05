@@ -76,4 +76,3 @@ class ConvDown(nn.Sequential):
 
         # initialize module
         super().__init__(*layers)
-

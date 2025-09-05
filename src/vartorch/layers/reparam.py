@@ -33,4 +33,3 @@ class Reparametrize(VarLayer):
             y = mu
 
         return y
-

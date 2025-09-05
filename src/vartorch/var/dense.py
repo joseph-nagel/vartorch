@@ -103,4 +103,3 @@ class DenseVarClassifier(VarClassifier):
 
         # store hyperparams
         self.save_hyperparameters(logger=True)
-

@@ -87,4 +87,3 @@ class VarLayer(nn.Module, ABC):
     def sampling(self, sample_mode: bool):
         '''Set sampling mode.'''
         self._sampling = sample_mode
-

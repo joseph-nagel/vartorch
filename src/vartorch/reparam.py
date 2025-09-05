@@ -51,4 +51,3 @@ def rho_from_sigma(sigma: torch.Tensor) -> torch.Tensor:
     '''Calculate rho from sigma.'''
     rho = torch.log(torch.exp(sigma) - 1)
     return rho
-

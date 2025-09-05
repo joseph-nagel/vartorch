@@ -25,4 +25,3 @@ from .moons import (
     post_predictive,
     post_uncertainty
 )
-

@@ -290,4 +290,3 @@ class DoubleConv(nn.Sequential):
 
         # initialize module
         super().__init__(conv_block1, conv_block2)
-

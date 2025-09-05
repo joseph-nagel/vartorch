@@ -16,7 +16,6 @@ is restricted to a multivariate Gaussian with a diagonal covariance matrix.
 ## Notebooks
 
 - [Half-moons example](notebooks/moons.ipynb)
-
 - [MNIST example](notebooks/mnist.ipynb)
 
 
@@ -36,4 +35,3 @@ python scripts/main.py fit --config config/moons.yaml
 ```
 python scripts/main.py fit --config config/mnist.yaml
 ```
-

@@ -132,4 +132,3 @@ def plot_entropy_histograms(
     fig.tight_layout()
 
     return fig, ax
-

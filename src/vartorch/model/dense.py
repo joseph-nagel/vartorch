@@ -53,4 +53,3 @@ class DenseBlock(nn.Sequential):
 
         # initialize module
         super().__init__(*layers)
-

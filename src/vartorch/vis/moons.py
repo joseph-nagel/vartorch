@@ -186,4 +186,3 @@ def post_uncertainty(var_model, x, num_samples=100):
 
     post_std = torch.std(sampled_probs, axis=-1).cpu().numpy()
     return post_std
-

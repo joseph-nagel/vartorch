@@ -20,4 +20,3 @@ from .base import VarClassifier
 from .conv import ConvVarClassifier
 
 from .dense import DenseVarClassifier
-

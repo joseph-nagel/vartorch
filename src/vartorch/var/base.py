@@ -512,4 +512,3 @@ class VarClassifier(LightningModule):
         # }
 
         return [optimizer], [lr_scheduler]
-

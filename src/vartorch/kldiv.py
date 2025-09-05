@@ -54,4 +54,3 @@ def kl_div_mc(
     log_p = dist.Normal(0, p_sigma).log_prob(z)
 
     return (log_q - log_p).sum()
-

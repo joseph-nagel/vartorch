@@ -277,4 +277,3 @@ class VarLinearWithLearnableTemperature(VarLayer):
         y = logits / temp
 
         return y
-
