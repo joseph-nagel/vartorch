@@ -16,17 +16,13 @@ from . import (
     reparam,
     utils
 )
-
 from .base import VarLayer
-
 from .linear import (
     VarLinear,
     VarLinearWithUncertainLogits,
     VarLinearWithLearnableTemperature
 )
-
 from .reparam import Reparametrize
-
 from .utils import (
     IntOrInts,
     ActivType,

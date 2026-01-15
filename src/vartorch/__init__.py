@@ -31,19 +31,16 @@ from . import (
     reparam,
     vis
 )
-
 from .data import (
     make_half_moons,
     MoonsDataModule,
     MNISTDataModule
 )
-
 from .kldiv import (
     kl_div_dist,
     kl_div_analytical,
     kl_div_mc
 )
-
 from .layers import (
     VarLayer,
     VarLinear,
@@ -58,11 +55,8 @@ from .layers import (
     SingleConv,
     DoubleConv
 )
-
 from .metrics import anomaly_score, calibration_metrics
-
 from .model import DenseBlock
-
 from .reparam import (
     reparametrize,
     sigma_from_log,
@@ -71,13 +65,11 @@ from .reparam import (
     rho_from_sigma
 
 )
-
 from .var import (
     VarClassifier,
     ConvVarClassifier,
     DenseVarClassifier
 )
-
 from .vis import (
     plot_point_predictions,
     plot_post_predictions,
