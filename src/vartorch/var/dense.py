@@ -52,7 +52,7 @@ class DenseVarClassifier(VarClassifier):
         num_samples: int = 1,
         likelihood_type: str = 'Categorical',
         lr: float = 1e-04
-    ) -> None:
+    ):
 
         # check feature numbers
         if len(num_features) < 2:

@@ -40,8 +40,7 @@ class VarLayer(nn.Module, ABC):
 
     '''
 
-    def __init__(self, param_mode: str = 'log') -> None:
-
+    def __init__(self, param_mode: str = 'log'):
         super().__init__()
 
         # set parametrization
@@ -52,7 +51,7 @@ class VarLayer(nn.Module, ABC):
 
     @abstractmethod
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @property
     def parametrization(self) -> str:

@@ -21,17 +21,17 @@ is restricted to a multivariate Gaussian with a diagonal covariance matrix.
 
 ## Installation
 
-```
+```bash
 pip install -e .
 ```
 
 
 ## Training
 
-```
+```bash
 python scripts/main.py fit --config config/moons.yaml
 ```
 
-```
+```bash
 python scripts/main.py fit --config config/mnist.yaml
 ```

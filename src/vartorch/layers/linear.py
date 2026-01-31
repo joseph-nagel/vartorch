@@ -60,7 +60,7 @@ class VarLinear(VarLayer):
         weight_std: float = 1.0,
         bias_std: float = 1.0,
         param_mode: str = 'log'
-    ) -> None:
+    ):
 
         # initialize base layer with certain std. parametrization
         super().__init__(param_mode)
@@ -156,7 +156,7 @@ class VarLinearWithUncertainLogits(VarLayer):
         weight_std: float = 1.0,
         bias_std: float = 1.0,
         param_mode: str = 'log'
-    ) -> None:
+    ):
 
         # initialize base layer with a certain std. parametrization
         super().__init__(param_mode)
@@ -240,7 +240,7 @@ class VarLinearWithLearnableTemperature(VarLayer):
         weight_std: float = 1.0,
         bias_std: float = 1.0,
         param_mode: str = 'log'
-    ) -> None:
+    ):
 
         # initialize base layer with a certain std. parametrization
         super().__init__(param_mode)

@@ -78,8 +78,7 @@ class VarClassifier(LightningModule):
         likelihood_type: str = 'Categorical',
         num_classes: int | None = None,
         lr: float = 1e-04
-    ) -> None:
-
+    ):
         super().__init__()
 
         # set model

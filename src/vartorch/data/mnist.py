@@ -38,8 +38,7 @@ class MNISTDataModule(LightningDataModule):
         random_state: int = 42,
         batch_size: int = 32,
         num_workers: int = 0
-    ) -> None:
-
+    ):
         super().__init__()
 
         # set dataset
@@ -89,13 +88,11 @@ class MNISTDataModule(LightningDataModule):
 
     def prepare_data(self) -> None:
         '''Download data.'''
-
         train_set = self.data_class(
             self.data_dir,
             train=True,
             download=True
         )
-
         test_set = self.data_class(
             self.data_dir,
             train=False,
@@ -129,7 +126,6 @@ class MNISTDataModule(LightningDataModule):
 
     def train_dataloader(self) -> DataLoader:
         '''Create train dataloader.'''
-
         if hasattr(self, 'train_set'):
             return DataLoader(
                 self.train_set,
@@ -144,7 +140,6 @@ class MNISTDataModule(LightningDataModule):
 
     def val_dataloader(self) -> DataLoader:
         '''Create val. dataloader.'''
-
         if hasattr(self, 'val_set'):
             return DataLoader(
                 self.val_set,
@@ -159,7 +154,6 @@ class MNISTDataModule(LightningDataModule):
 
     def test_dataloader(self) -> DataLoader:
         '''Create test dataloader.'''
-
         if hasattr(self, 'test_set'):
             return DataLoader(
                 self.test_set,

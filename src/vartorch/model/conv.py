@@ -29,7 +29,7 @@ class ConvDown(nn.Sequential):
         pool_last: bool = True,
         double_conv: bool = False,
         inout_first: bool = True
-    ) -> None:
+    ):
 
         # determine conv type
         ConvType = DoubleConv if double_conv else SingleConv

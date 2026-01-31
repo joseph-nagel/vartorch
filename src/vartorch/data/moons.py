@@ -98,8 +98,7 @@ class MoonsDataModule(LightningDataModule):
         random_state: int | None = 42,
         batch_size: int = 32,
         num_workers: int = 0
-    ) -> None:
-
+    ):
         super().__init__()
 
         # set data parameters
