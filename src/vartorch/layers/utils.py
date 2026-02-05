@@ -40,10 +40,8 @@ def make_activation(mode: ActivType | None = 'leaky_relu', **kwargs: Any) -> nn.
 
 def make_block(layers: nn.Module | Sequence[nn.Module | None]) -> nn.Module:
     '''Assemble a block of layers.'''
-
     if isinstance(layers, nn.Module):
         block = layers
-
     elif isinstance(layers, (list, tuple)):
         not_none_layers = [l for l in layers if l is not None]
         if len(not_none_layers) == 0:
@@ -52,10 +50,8 @@ def make_block(layers: nn.Module | Sequence[nn.Module | None]) -> nn.Module:
             block = not_none_layers[0]
         else:
             block = nn.Sequential(*not_none_layers)
-
     else:
         raise TypeError(f'Invalid layers type: {type(layers)}')
-
     return block
 
 

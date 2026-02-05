@@ -41,8 +41,8 @@ def make_half_moons(
     )
 
     # center data
-    x[:,0] -= 0.5
-    x[:,1] -= 0.25
+    x[:, 0] -= 0.5
+    x[:, 1] -= 0.25
 
     # add class-specific offsets
     x[y==0, 1] += offsets[0]

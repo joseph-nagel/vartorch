@@ -67,12 +67,10 @@ def plot_function_2d(
     y_values = np.linspace(*y_limits, num=201)
 
     (x_grid, y_grid) = np.meshgrid(x_values, y_values)
-
     xy_values = np.stack((x_grid.ravel(), y_grid.ravel()), axis=1)
 
     # compute outputs
     z_values = function(xy_values)
-
     z_grid = z_values.reshape(x_grid.shape)
 
     # plot function
@@ -116,20 +114,14 @@ def plot_data_and_preds_2d(
     title='Data and predictions'
 ):
     '''Plot data and predictions.'''
-
     fig, ax = plt.subplots(figsize=figsize)
-
     plot_data_2d(x_data, y_data, colors=(plt.cm.Set1(1), plt.cm.Set1(0)), ax=ax)
-
     ax.set(xlim=xlim, ylim=ylim)  # set limits before 2D function is plotted
-
     plot_function_2d(pred_function, levels=levels, ax=ax)
-
     ax.set_aspect('equal', adjustable='box')
     ax.set_title(title)
     ax.legend(loc='upper left')
     fig.tight_layout()
-
     return fig, ax
 
 

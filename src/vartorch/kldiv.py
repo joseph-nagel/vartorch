@@ -28,12 +28,9 @@ def kl_div_dist(
     p_sigma: torch.Tensor | float = 1.0
 ) -> torch.Tensor:
     '''Compute the KL divergence with PyTorch distributions.'''
-
     q = dist.Normal(q_mu, q_sigma)  # variational distribution
     p = dist.Normal(0, p_sigma)  # prior distribution
-
     kl = dist.kl_divergence(q, p).sum()
-
     return kl
 
 
@@ -49,8 +46,6 @@ def kl_div_mc(
     p_sigma: torch.Tensor | float = 1.0
 ) -> torch.Tensor:
     '''Compute KL divergence with a single MC sample.'''
-
     log_q = dist.Normal(q_mu, q_sigma).log_prob(z)
     log_p = dist.Normal(0, p_sigma).log_prob(z)
-
     return (log_q - log_p).sum()

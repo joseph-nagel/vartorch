@@ -18,7 +18,6 @@ def plot_point_predictions(
     '''Plot point predictions.'''
 
     entropy = dist.Categorical(probs=probs).entropy()  # compute entropy from probabilities
-
     num_classes = probs.shape[-1]  # get number of classes
 
     fig, axes = plt.subplots(nrows=nrows, ncols=2, figsize=figsize)
@@ -57,7 +56,6 @@ def plot_post_predictions(
 
     probs = torch.mean(sampled_probs, axis=-1)  # compute probabilities from samples
     entropy = dist.Categorical(probs=probs).entropy()  # compute entropy from probabilities
-
     num_classes = probs.shape[-1]  # get number of classes
 
     fig, axes = plt.subplots(nrows=nrows, ncols=3, figsize=figsize)
@@ -86,7 +84,7 @@ def plot_post_predictions(
         ax2.set_title('$\pi(c|x,w)$, $w$ from $\pi(w|\mathcal{D})$')
         ax2.set_xlim((0, 1))
         ax2.legend(['c={}'.format(c) for c in highest_ids], loc='upper center')
-        ax2.grid(visible=True, which='both', color='lightgray', linestyle='-')
+        ax2.grid(color='lightgray', linestyle='-')
         ax2.set_axisbelow(True)
 
         # posterior predictive
@@ -127,7 +125,7 @@ def plot_entropy_histograms(
     ax.set_title(title)
     ax.legend(loc='upper right')
 
-    ax.grid(visible=True, which='both', color='lightgray', linestyle='-')
+    ax.grid(color='lightgray', linestyle='-')
     ax.set_axisbelow(True)
     fig.tight_layout()
 

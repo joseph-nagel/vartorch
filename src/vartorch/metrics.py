@@ -87,15 +87,12 @@ def anomaly_score(
 
 def _entropy(probs: torch.Tensor) -> torch.Tensor:
     '''Compute entropy score.'''
-
     # compute Bernoulli entropy (binary classifier)
     if probs.shape[-1] == 1:
         entropy = dist.Bernoulli(probs=probs).entropy()
-
     # compute categorical entropy (multi-class classifier)
     else:
         entropy = dist.Categorical(probs=probs).entropy()
-
     return entropy
 
 
@@ -164,7 +161,6 @@ def calibration_metrics(
     binned_num_samples = np.zeros(num_bins, dtype='int')
 
     for idx in range(num_bins):
-
         lower = conf_edges[idx]
         upper = conf_edges[idx+1]
 
@@ -195,7 +191,6 @@ def _calibration_errors(
     binned_num_samples: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     '''Compute calibration errors (bin-wise, expected and maximum).'''
-
     binned_ce = np.abs(binned_acc - binned_conf)
 
     mce = np.max([e for e in binned_ce if not np.isnan(e)])

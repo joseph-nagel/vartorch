@@ -100,10 +100,7 @@ class VarClassifier(LightningModule):
         self.sample(True)
 
         # store hyperparams
-        self.save_hyperparameters(
-            ignore='model',
-            logger=True
-        )
+        self.save_hyperparameters(ignore='model', logger=True)
 
         # create accuracy metrics
         if self.likelihood_type == 'Bernoulli':
@@ -149,7 +146,6 @@ class VarClassifier(LightningModule):
 
     @sampling.setter
     def sampling(self, sample_mode: bool) -> None:
-
         # set sampling mode for all model layers
         for layer in self.model.modules():
             if isinstance(layer, VarLayer):  # if hasattr(layer, 'sampling'):
@@ -215,7 +211,6 @@ class VarClassifier(LightningModule):
 
         # predict with posterior mean weights
         if num_samples == 1:
-
             # turn off sampling
             self.sample(False)
 
@@ -227,7 +222,6 @@ class VarClassifier(LightningModule):
 
         # compute posterior predictive distribution
         else:
-
             # turn on sampling
             self.sample(True)
 
@@ -261,7 +255,6 @@ class VarClassifier(LightningModule):
 
     def kl(self) -> torch.Tensor:
         '''Accumulate KL divergence from model layers.'''
-
         kl = torch.tensor(0.0, device=self.device)
 
         # accumulate KL div. from appropriate layers
@@ -312,7 +305,6 @@ class VarClassifier(LightningModule):
 
         # loop over samples
         for _ in range(num_samples):
-
             out = self.ll(x, y, return_preds=return_preds)  # during the LL computation also the KL terms are calculated
 
             if return_preds:
@@ -411,7 +403,6 @@ class VarClassifier(LightningModule):
         batch: Sequence[torch.Tensor] | dict[str, torch.Tensor],
         batch_idx: int
     ) -> torch.Tensor:
-
         x_batch, y_batch = self._get_batch(batch)
 
         loss, probs = self.loss(
@@ -435,7 +426,6 @@ class VarClassifier(LightningModule):
         batch: Sequence[torch.Tensor] | dict[str, torch.Tensor],
         batch_idx: int
     ) -> torch.Tensor:
-
         x_batch, y_batch = self._get_batch(batch)
 
         loss, probs = self.loss(
@@ -459,7 +449,6 @@ class VarClassifier(LightningModule):
         batch: Sequence[torch.Tensor] | dict[str, torch.Tensor],
         batch_idx: int
     ) -> torch.Tensor:
-
         x_batch, y_batch = self._get_batch(batch)
 
         loss, probs = self.loss(
