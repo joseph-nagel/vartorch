@@ -1,4 +1,4 @@
-'''
+"""
 Variational linear layers.
 
 Summary
@@ -16,7 +16,7 @@ allow for a finer modeling and control of the encountered uncertainties.
 The former represents the logits as Gaussians with learnable means and standard deviations.
 The latter performs an input-dependent temperature scaling on the logits.
 
-'''
+"""
 
 import torch
 import torch.nn as nn
@@ -28,7 +28,7 @@ from .reparam import Reparametrize
 
 
 class VarLinear(VarLayer):
-    '''
+    """
     Variational linear layer.
 
     Summary
@@ -47,11 +47,11 @@ class VarLinear(VarLayer):
         Prior std. of the weights.
     bias_std : float
         Prior std. of the biases.
-    param_mode : {'log', 'rho'}
+    param_mode : {"log", "rho"}
         Determines how the non-negative standard deviation
         is represented in terms of a real-valued parameter.
 
-    '''
+    """
 
     def __init__(
         self,
@@ -59,7 +59,7 @@ class VarLinear(VarLayer):
         out_features: int,
         weight_std: float = 1.0,
         bias_std: float = 1.0,
-        param_mode: str = 'log'
+        param_mode: str = "log",
     ):
 
         # initialize base layer with certain std. parametrization
@@ -69,8 +69,8 @@ class VarLinear(VarLayer):
         self.in_features = in_features
         self.out_features = out_features
 
-        self.register_buffer('weight_std', torch.tensor(weight_std))
-        self.register_buffer('bias_std', torch.tensor(bias_std))
+        self.register_buffer("weight_std", torch.tensor(weight_std))
+        self.register_buffer("bias_std", torch.tensor(bias_std))
 
         # create parameters
         self.w_mu = nn.Parameter(torch.empty(self.out_features, self.in_features))
@@ -84,7 +84,7 @@ class VarLinear(VarLayer):
 
     # TODO: find optional initialization strategy
     def reset_parameters(self) -> None:
-        '''Re-initialize the parameters.'''
+        """Re-initialize the parameters."""
 
         # initialize means of the weights like nn.Linear
         torch.nn.init.kaiming_uniform_(self.w_mu)
@@ -92,7 +92,7 @@ class VarLinear(VarLayer):
         # initialize std. of the weights with the prior value
         torch.nn.init.constant_(
             self.w_sigma_param,
-            self.sigma_inverse(self.weight_std).item()
+            self.sigma_inverse(self.weight_std).item(),
         )
 
         # initialize means of the bias terms with zeros
@@ -101,7 +101,7 @@ class VarLinear(VarLayer):
         # initialize std. of the bias terms with the prior value
         torch.nn.init.constant_(
             self.b_sigma_param,
-            self.sigma_inverse(self.bias_std).item()
+            self.sigma_inverse(self.bias_std).item(),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -123,8 +123,9 @@ class VarLinear(VarLayer):
 
         # compute KL divergence
         if self.sampling:
-            self.kl_acc = kl_div_dist(self.w_mu, w_sigma, self.weight_std) \
-                        + kl_div_dist(self.b_mu, b_sigma, self.bias_std)
+            self.kl_acc = kl_div_dist(self.w_mu, w_sigma, self.weight_std) + kl_div_dist(
+                self.b_mu, b_sigma, self.bias_std
+            )
 
         # do not compute KL divergence
         else:
@@ -134,7 +135,7 @@ class VarLinear(VarLayer):
 
 
 class VarLinearWithUncertainLogits(VarLayer):
-    '''
+    """
     Variational linear layer with uncertain logits.
 
     Summary
@@ -147,7 +148,7 @@ class VarLinearWithUncertainLogits(VarLayer):
     ----------
     See documentation of `VarLinear`.
 
-    '''
+    """
 
     def __init__(
         self,
@@ -155,7 +156,7 @@ class VarLinearWithUncertainLogits(VarLayer):
         out_features: int,
         weight_std: float = 1.0,
         bias_std: float = 1.0,
-        param_mode: str = 'log'
+        param_mode: str = "log",
     ):
 
         # initialize base layer with a certain std. parametrization
@@ -167,8 +168,7 @@ class VarLinearWithUncertainLogits(VarLayer):
             out_features=out_features,
             weight_std=weight_std,
             bias_std=bias_std,
-            param_mode=self.parametrization  # set parametrization for the linear layer predicting the logit means
-
+            param_mode=self.parametrization,  # set parametrization for linear layer predicting the logit means
         )
 
         # create layer predicting the logit stds.
@@ -177,13 +177,13 @@ class VarLinearWithUncertainLogits(VarLayer):
             out_features=out_features,
             weight_std=weight_std,
             bias_std=bias_std,
-            param_mode=self.parametrization  # set parametrization for the linear layer predicting the logit sigma params
+            param_mode=self.parametrization,  # set parametrization for linear layer predicting the logit sigma params
         )
 
-        self.reparametrize = Reparametrize(param_mode=self.parametrization)  # set parametrization for stds. of the logits
+        self.reparametrize = Reparametrize(param_mode=self.parametrization)  # set parametrization for logit stds.
 
     def epistemic(self) -> None:
-        '''Set epistemic mode.'''
+        """Set epistemic mode."""
 
         # turn on weight sampling
         self.logits_mu.sampling = True
@@ -193,7 +193,7 @@ class VarLinearWithUncertainLogits(VarLayer):
         self.reparametrize.sampling = False
 
     def aleatoric(self) -> None:
-        '''Set aleatoric mode.'''
+        """Set aleatoric mode."""
 
         # turn off weight sampling
         self.logits_mu.sampling = False
@@ -218,7 +218,7 @@ class VarLinearWithUncertainLogits(VarLayer):
 
 
 class VarLinearWithLearnableTemperature(VarLayer):
-    '''
+    """
     Variational linear layer with learnable temperature.
 
     Summary
@@ -231,7 +231,7 @@ class VarLinearWithLearnableTemperature(VarLayer):
     ----------
     See documentation of `VarLinear`.
 
-    '''
+    """
 
     def __init__(
         self,
@@ -239,7 +239,7 @@ class VarLinearWithLearnableTemperature(VarLayer):
         out_features: int,
         weight_std: float = 1.0,
         bias_std: float = 1.0,
-        param_mode: str = 'log'
+        param_mode: str = "log",
     ):
 
         # initialize base layer with a certain std. parametrization
@@ -251,7 +251,7 @@ class VarLinearWithLearnableTemperature(VarLayer):
             out_features=out_features,
             weight_std=weight_std,
             bias_std=bias_std,
-            param_mode=self.parametrization  # set parametrization for the linear layer predicting the logits
+            param_mode=self.parametrization,  # set parametrization for the linear layer predicting the logits
         )
 
         # create layer predicting the log-temperature
@@ -260,7 +260,7 @@ class VarLinearWithLearnableTemperature(VarLayer):
             out_features=1,
             weight_std=weight_std,
             bias_std=bias_std,
-            param_mode=self.parametrization  # set parametrization for the linear layer predicting the log-temperature
+            param_mode=self.parametrization,  # set parametrization for the linear layer predicting the log-temperature
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

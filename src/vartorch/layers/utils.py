@@ -1,4 +1,4 @@
-'''Model layer utils.'''
+"""Model layer utils."""
 
 from typing import Any
 from collections.abc import Sequence
@@ -14,19 +14,19 @@ ActivType = str | type[nn.Module]
 
 
 ACTIVATIONS = {
-    'identity': nn.Identity,
-    'sigmoid': nn.Sigmoid,
-    'tanh': nn.Tanh,
-    'relu': nn.ReLU,
-    'leaky_relu': nn.LeakyReLU,
-    'elu': nn.ELU,
-    'softplus': nn.Softplus,
-    'swish': nn.SiLU
+    "identity": nn.Identity,
+    "sigmoid": nn.Sigmoid,
+    "tanh": nn.Tanh,
+    "relu": nn.ReLU,
+    "leaky_relu": nn.LeakyReLU,
+    "elu": nn.ELU,
+    "softplus": nn.Softplus,
+    "swish": nn.SiLU,
 }
 
 
-def make_activation(mode: ActivType | None = 'leaky_relu', **kwargs: Any) -> nn.Module | None:
-    '''Create activation function.'''
+def make_activation(mode: ActivType | None = "leaky_relu", **kwargs: Any) -> nn.Module | None:
+    """Create activation function."""
     if mode is None:
         activ = None
     elif isclass(mode):
@@ -34,29 +34,29 @@ def make_activation(mode: ActivType | None = 'leaky_relu', **kwargs: Any) -> nn.
     elif isinstance(mode, str) and mode in ACTIVATIONS.keys():
         activ = ACTIVATIONS[mode](**kwargs)
     else:
-        raise ValueError(f'Unknown activation: {mode}')
+        raise ValueError(f"Unknown activation: {mode}")
     return activ
 
 
 def make_block(layers: nn.Module | Sequence[nn.Module | None]) -> nn.Module:
-    '''Assemble a block of layers.'''
+    """Assemble a block of layers."""
     if isinstance(layers, nn.Module):
         block = layers
     elif isinstance(layers, (list, tuple)):
-        not_none_layers = [l for l in layers if l is not None]
+        not_none_layers = [lr for lr in layers if lr is not None]
         if len(not_none_layers) == 0:
-            raise ValueError('No layers to assemble')
+            raise ValueError("No layers to assemble")
         elif len(not_none_layers) == 1:
             block = not_none_layers[0]
         else:
             block = nn.Sequential(*not_none_layers)
     else:
-        raise TypeError(f'Invalid layers type: {type(layers)}')
+        raise TypeError(f"Invalid layers type: {type(layers)}")
     return block
 
 
 def make_dropout(drop_rate: float | None = None) -> nn.Module | None:
-    '''Create a dropout layer.'''
+    """Create a dropout layer."""
     if drop_rate is None:
         dropout = None
     else:
@@ -69,12 +69,12 @@ def make_dense(
     out_features: int,
     bias: bool = True,
     batchnorm: bool = False,
-    activation: ActivType | None = 'leaky_relu',
+    activation: ActivType | None = "leaky_relu",
     drop_rate: float | None = None,
     variational: bool = False,
-    var_opts: dict[str, Any] = {}
+    var_opts: dict[str, Any] = {},
 ) -> nn.Module:
-    '''
+    """
     Create fully connected layer.
 
     Parameters
@@ -96,7 +96,7 @@ def make_dense(
     var_opts : dict
         Options for variational linear layer.
 
-    '''
+    """
 
     # create dropout layer
     dropout = make_dropout(drop_rate=drop_rate)
@@ -106,7 +106,7 @@ def make_dense(
         linear = nn.Linear(
             in_features,
             out_features,
-            bias=bias  # the bias should be disabled if a batchnorm directly follows after the linear layer
+            bias=bias,  # the bias should be disabled if a batchnorm directly follows after the linear layer
         )
 
     # create linear variational layer
@@ -114,7 +114,7 @@ def make_dense(
         linear = VarLinear(
             in_features,
             out_features,
-            **var_opts
+            **var_opts,
         )
 
     # create activation function
@@ -124,7 +124,7 @@ def make_dense(
     norm = nn.BatchNorm1d(out_features) if batchnorm else None
 
     # assemble block
-    layers = [dropout, linear, activ, norm]  # note that the normalization follows the activation (which could be reversed of course)
+    layers = [dropout, linear, activ, norm]  # note that normalization follows activation (which could be reversed)
     dense_block = make_block(layers)
 
     return dense_block
@@ -135,12 +135,12 @@ def make_conv(
     out_channels: int,
     kernel_size: IntOrInts = 3,
     stride: IntOrInts = 1,
-    padding: IntOrInts | str = 'same',
+    padding: IntOrInts | str = "same",
     bias: bool = True,
     batchnorm: bool = False,
-    activation: ActivType | None = 'leaky_relu'
+    activation: ActivType | None = "leaky_relu",
 ) -> nn.Module:
-    '''
+    """
     Create convolutional layer.
 
     Parameters
@@ -162,7 +162,7 @@ def make_conv(
     activation : str or None
         Nonlinearity type.
 
-    '''
+    """
 
     # create conv layer
     conv = nn.Conv2d(
@@ -171,7 +171,7 @@ def make_conv(
         kernel_size=kernel_size,
         stride=stride,
         padding=padding,
-        bias=bias  # the bias should be disabled if a batchnorm directly follows after the convolution
+        bias=bias,  # the bias should be disabled if a batchnorm directly follows after the convolution
     )
 
     # create activation function
@@ -181,14 +181,14 @@ def make_conv(
     norm = nn.BatchNorm2d(out_channels) if batchnorm else None
 
     # assemble block
-    layers = [conv, activ, norm]  # note that the normalization follows the activation (which could be reversed of course)
+    layers = [conv, activ, norm]  # note that normalization follows activation (which could be reversed)
     conv_block = make_block(layers)
 
     return conv_block
 
 
 class SingleConv(nn.Sequential):
-    '''Single conv. block.'''
+    """Single conv. block."""
 
     def __init__(
         self,
@@ -196,10 +196,10 @@ class SingleConv(nn.Sequential):
         out_channels: int,
         kernel_size: IntOrInts = 3,
         stride: IntOrInts = 1,
-        padding: IntOrInts | str = 'same',
+        padding: IntOrInts | str = "same",
         bias: bool = True,
         batchnorm: bool = False,
-        activation: ActivType | None = 'leaky_relu'
+        activation: ActivType | None = "leaky_relu",
     ):
 
         # create conv layer
@@ -209,7 +209,7 @@ class SingleConv(nn.Sequential):
             kernel_size=kernel_size,
             stride=stride,
             padding=padding,
-            bias=bias  # the bias should be disabled if a batchnorm directly follows after the convolution
+            bias=bias,  # the bias should be disabled if a batchnorm directly follows after the convolution
         )
 
         # create activation function
@@ -219,15 +219,15 @@ class SingleConv(nn.Sequential):
         norm = nn.BatchNorm2d(out_channels) if batchnorm else None
 
         # assemble block
-        layers = [conv, activ, norm]  # note that the normalization follows the activation (which could be reversed of course)
-        not_none_layers = [l for l in layers if l is not None]
+        layers = [conv, activ, norm]  # note that normalization follows activation (which could be reversed)
+        not_none_layers = [lr for lr in layers if lr is not None]
 
         # initialize module
         super().__init__(*not_none_layers)
 
 
 class DoubleConv(nn.Sequential):
-    '''Double conv. blocks.'''
+    """Double conv. blocks."""
 
     def __init__(
         self,
@@ -235,17 +235,17 @@ class DoubleConv(nn.Sequential):
         out_channels: int,
         kernel_size: IntOrInts = 3,
         stride: IntOrInts = 1,
-        padding: IntOrInts | str = 'same',
+        padding: IntOrInts | str = "same",
         bias: bool = True,
         batchnorm: bool = False,
-        activation: ActivType | None = 'leaky_relu',
-        last_activation: ActivType | None = 'same',
+        activation: ActivType | None = "leaky_relu",
+        last_activation: ActivType | None = "same",
         normalize_last: bool = True,
-        inout_first: bool = True
+        inout_first: bool = True,
     ):
 
         # determine last activation
-        if last_activation == 'same':
+        if last_activation == "same":
             last_activation = activation
 
         # create first conv
@@ -257,7 +257,7 @@ class DoubleConv(nn.Sequential):
             padding=padding,
             bias=bias,
             batchnorm=batchnorm,
-            activation=activation
+            activation=activation,
         )
 
         # create second conv
@@ -269,7 +269,7 @@ class DoubleConv(nn.Sequential):
             padding=padding,
             bias=bias,
             batchnorm=(batchnorm and normalize_last),
-            activation=last_activation
+            activation=last_activation,
         )
 
         # initialize module

@@ -1,4 +1,4 @@
-'''
+"""
 Variational classifier.
 
 Summary
@@ -14,7 +14,7 @@ maximizing the ELBO w.r.t. the parameters of the variational distribution.
 Other non-Bayesian unknown parameters of the prior and the likelihood,
 such as the weights of non-variational layers, can also be learned this way.
 
-'''
+"""
 
 from typing import Self
 from collections.abc import Sequence
@@ -29,7 +29,7 @@ from ..layers import VarLayer
 
 
 class VarClassifier(LightningModule):
-    '''
+    """
     Variational classifier base class.
 
     Summary
@@ -62,22 +62,22 @@ class VarClassifier(LightningModule):
         Logits-predicting model with variational layers.
     num_samples : int
         Number of MC samples to simulate the ELBO.
-    likelihood_type : {'Bernoulli', 'Categorical'}
+    likelihood_type : {"Bernoulli", "Categorical"}
         Likelihood function type.
     num_classes : int
         Number of classes.
     lr : float
         Initial optimizer learning rate.
 
-    '''
+    """
 
     def __init__(
         self,
         model: nn.Module,
         num_samples: int = 1,
-        likelihood_type: str = 'Categorical',
+        likelihood_type: str = "Categorical",
         num_classes: int | None = None,
-        lr: float = 1e-04
+        lr: float = 1e-04,
     ):
         super().__init__()
 
@@ -88,10 +88,10 @@ class VarClassifier(LightningModule):
         self.num_samples = abs(int(num_samples))
 
         # set likelihood type
-        if likelihood_type in ('Bernoulli', 'Categorical'):
+        if likelihood_type in ("Bernoulli", "Categorical"):
             self.likelihood_type = likelihood_type
         else:
-            raise ValueError(f'Unknown likelihood type: {likelihood_type}')
+            raise ValueError(f"Unknown likelihood type: {likelihood_type}")
 
         # set initial learning rate
         self.lr = abs(lr)
@@ -100,21 +100,21 @@ class VarClassifier(LightningModule):
         self.sample(True)
 
         # store hyperparams
-        self.save_hyperparameters(ignore='model', logger=True)
+        self.save_hyperparameters(ignore="model", logger=True)
 
         # create accuracy metrics
-        if self.likelihood_type == 'Bernoulli':
-            self.train_acc = Accuracy(task='binary')
-            self.val_acc = Accuracy(task='binary')
-            self.test_acc = Accuracy(task='binary')
+        if self.likelihood_type == "Bernoulli":
+            self.train_acc = Accuracy(task="binary")
+            self.val_acc = Accuracy(task="binary")
+            self.test_acc = Accuracy(task="binary")
 
         elif num_classes is not None:
             if num_classes < 2:
-                raise ValueError('Number of classes should be at least two')
+                raise ValueError("Number of classes should be at least two")
 
-            self.train_acc = Accuracy(task='multiclass', num_classes=num_classes)
-            self.val_acc = Accuracy(task='multiclass', num_classes=num_classes)
-            self.test_acc = Accuracy(task='multiclass', num_classes=num_classes)
+            self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
+            self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)
+            self.test_acc = Accuracy(task="multiclass", num_classes=num_classes)
 
     @property
     def sampling(self) -> bool:
@@ -123,12 +123,12 @@ class VarClassifier(LightningModule):
         per_layer = []
 
         for layer in self.model.modules():
-            if isinstance(layer, VarLayer):  # if hasattr(layer, 'sampling'):
+            if isinstance(layer, VarLayer):  # if hasattr(layer, "sampling"):
                 per_layer.append(layer.sampling)
 
         # determine global sampling mode
         if len(per_layer) == 0:
-            raise RuntimeError('No layers with sampling mode found')
+            raise RuntimeError("No layers with sampling mode found")
 
         elif len(per_layer) == 1:
             sampling = per_layer[0]
@@ -140,7 +140,7 @@ class VarClassifier(LightningModule):
             if all_same:
                 sampling = first_mode
             else:
-                raise RuntimeError('Inconsistent sampling modes encountered')
+                raise RuntimeError("Inconsistent sampling modes encountered")
 
         return sampling
 
@@ -148,16 +148,16 @@ class VarClassifier(LightningModule):
     def sampling(self, sample_mode: bool) -> None:
         # set sampling mode for all model layers
         for layer in self.model.modules():
-            if isinstance(layer, VarLayer):  # if hasattr(layer, 'sampling'):
+            if isinstance(layer, VarLayer):  # if hasattr(layer, "sampling"):
                 layer.sampling = sample_mode
 
     def sample(self, sample_mode: bool = True) -> Self:
-        '''Set sampling mode.'''
+        """Set sampling mode."""
         self.sampling = sample_mode
         return self
 
     def train(self, train_mode: bool = True) -> Self:
-        '''Set training mode.'''
+        """Set training mode."""
 
         # set module training mode
         super().train(train_mode)
@@ -169,12 +169,12 @@ class VarClassifier(LightningModule):
         return self
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        '''Run model.'''
+        """Run model."""
         logits = self.model(x)
         return logits
 
     def predict(self, x: torch.Tensor, num_samples: int = 1) -> torch.Tensor:
-        '''Predict logits.'''
+        """Predict logits."""
 
         # loop over samples
         logits_list = []
@@ -189,13 +189,13 @@ class VarClassifier(LightningModule):
         return logits_samples
 
     def probs_from_logits(self, logits: torch.Tensor, average: bool = True) -> torch.Tensor:
-        '''Compute (average) probabilities from (samples of) logits.'''
+        """Compute (average) probabilities from (samples of) logits."""
 
         if logits.ndim not in (2, 3):
-            raise ValueError(f'Invalid input shape: {logits.shape}')
+            raise ValueError(f"Invalid input shape: {logits.shape}")
 
         # calculate probabilities
-        if self.likelihood_type == 'Bernoulli':
+        if self.likelihood_type == "Bernoulli":
             probs = torch.sigmoid(logits)
         else:
             probs = torch.softmax(logits, dim=1)
@@ -207,7 +207,7 @@ class VarClassifier(LightningModule):
         return probs
 
     def predict_proba(self, x: torch.Tensor, num_samples: int = 1) -> torch.Tensor:
-        '''Predict probabilities (mean weight or posterior predictive).'''
+        """Predict probabilities (mean weight or posterior predictive)."""
 
         # predict with posterior mean weights
         if num_samples == 1:
@@ -237,29 +237,29 @@ class VarClassifier(LightningModule):
         self,
         x: torch.Tensor,
         num_samples: int = 1,
-        threshold: float = 0.5
+        threshold: float = 0.5,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        '''Predict top class and probability (mean weight or posterior predictive).'''
+        """Predict top class and probability (mean weight or posterior predictive)."""
 
         # predict probabilities
         probs = self.predict_proba(x, num_samples=num_samples)
 
         # get top class and its probability
-        if self.likelihood_type == 'Bernoulli':
+        if self.likelihood_type == "Bernoulli":
             top_class = (probs >= threshold).int()
-            top_prob = torch.where(top_class==1, probs, 1 - probs)
+            top_prob = torch.where(top_class == 1, probs, 1 - probs)
         else:
             top_prob, top_class = torch.topk(probs, k=1, dim=1)
 
         return top_class, top_prob
 
     def kl(self) -> torch.Tensor:
-        '''Accumulate KL divergence from model layers.'''
+        """Accumulate KL divergence from model layers."""
         kl = torch.tensor(0.0, device=self.device)
 
         # accumulate KL div. from appropriate layers
         for layer in self.model.modules():
-            if hasattr(layer, 'kl_acc'):
+            if hasattr(layer, "kl_acc"):
                 kl = kl + layer.kl_acc.to(self.device)
 
         return kl
@@ -268,15 +268,15 @@ class VarClassifier(LightningModule):
         self,
         x: torch.Tensor,
         y: torch.Tensor,
-        return_preds: bool = False
+        return_preds: bool = False,
     ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
-        '''Compute the log-likelihood.'''
+        """Compute the log-likelihood."""
 
         # predict logits
         logits = self(x)
 
         # compute log-likelihood
-        if self.likelihood_type == 'Bernoulli':
+        if self.likelihood_type == "Bernoulli":
             ll = dist.Bernoulli(logits=logits.squeeze()).log_prob(y.float()).sum()
         else:
             ll = dist.Categorical(logits=logits).log_prob(y).sum()
@@ -293,9 +293,9 @@ class VarClassifier(LightningModule):
         num_samples: int = 1,
         ll_weight: float = 1.0,
         kl_weight: float = 1.0,
-        return_preds: bool = False
+        return_preds: bool = False,
     ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
-        '''Simulate the ELBO by MC sampling.'''
+        """Simulate the ELBO by MC sampling."""
 
         ll = torch.tensor(0.0, device=self.device)
         kl = torch.tensor(0.0, device=self.device)
@@ -337,9 +337,9 @@ class VarClassifier(LightningModule):
         num_samples: int = 1,
         total_size: int | None = None,
         reweight_ll: bool = True,
-        return_preds: bool = False
+        return_preds: bool = False,
     ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
-        '''Simulate the negative-ELBO loss.'''
+        """Simulate the negative-ELBO loss."""
 
         # get weighting factors
         ll_weight = 1.0
@@ -363,7 +363,7 @@ class VarClassifier(LightningModule):
             num_samples=num_samples,
             ll_weight=ll_weight,
             kl_weight=kl_weight,
-            return_preds=return_preds
+            return_preds=return_preds,
         )
 
         if return_preds:
@@ -380,28 +380,26 @@ class VarClassifier(LightningModule):
             return loss
 
     @staticmethod
-    def _get_batch(
-        batch: Sequence[torch.Tensor] | dict[str, torch.Tensor]
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        '''Get batch features and labels.'''
+    def _get_batch(batch: Sequence[torch.Tensor] | dict[str, torch.Tensor]) -> tuple[torch.Tensor, torch.Tensor]:
+        """Get batch features and labels."""
 
         if isinstance(batch, (tuple, list)):
             x_batch = batch[0]
             y_batch = batch[1]
 
         elif isinstance(batch, dict):
-            x_batch = batch['features']
-            y_batch = batch['labels']
+            x_batch = batch["features"]
+            y_batch = batch["labels"]
 
         else:
-            raise TypeError(f'Invalid batch type: {type(batch)}')
+            raise TypeError(f"Invalid batch type: {type(batch)}")
 
         return x_batch, y_batch
 
     def training_step(
         self,
         batch: Sequence[torch.Tensor] | dict[str, torch.Tensor],
-        batch_idx: int
+        batch_idx: int,
     ) -> torch.Tensor:
         x_batch, y_batch = self._get_batch(batch)
 
@@ -411,20 +409,20 @@ class VarClassifier(LightningModule):
             num_samples=self.num_samples,
             total_size=len(self.trainer.train_dataloader.dataset),
             reweight_ll=True,  # up-weight LL so as to estimate the full dataset loss (batches can be better compared)
-            return_preds=True
+            return_preds=True,
         )
 
         _ = self.train_acc(probs.squeeze(), y_batch)
 
-        self.log('train_loss', loss.item())  # Lightning logs batch-wise scalars during training per default
-        self.log('train_acc', self.train_acc)  # the same applies to torchmetrics.Metric objects
+        self.log("train_loss", loss.item())  # Lightning logs batch-wise scalars during training per default
+        self.log("train_acc", self.train_acc)  # the same applies to torchmetrics.Metric objects
 
         return loss
 
     def validation_step(
         self,
         batch: Sequence[torch.Tensor] | dict[str, torch.Tensor],
-        batch_idx: int
+        batch_idx: int,
     ) -> torch.Tensor:
         x_batch, y_batch = self._get_batch(batch)
 
@@ -434,20 +432,20 @@ class VarClassifier(LightningModule):
             num_samples=self.num_samples,
             total_size=len(self.trainer.val_dataloaders.dataset),
             reweight_ll=True,  # up-weight LL so as to estimate the full dataset loss (can be averaged)
-            return_preds=True
+            return_preds=True,
         )
 
         _ = self.val_acc(probs.squeeze(), y_batch)
 
-        self.log('val_loss', loss.item())  # Lightning automatically averages scalars over batches for validation
-        self.log('val_acc', self.val_acc)  # the batch size is considered when logging torchmetrics.Metric objects
+        self.log("val_loss", loss.item())  # Lightning automatically averages scalars over batches for validation
+        self.log("val_acc", self.val_acc)  # the batch size is considered when logging torchmetrics.Metric objects
 
         return loss
 
     def test_step(
         self,
         batch: Sequence[torch.Tensor] | dict[str, torch.Tensor],
-        batch_idx: int
+        batch_idx: int,
     ) -> torch.Tensor:
         x_batch, y_batch = self._get_batch(batch)
 
@@ -457,13 +455,13 @@ class VarClassifier(LightningModule):
             num_samples=1,  # use a single sample (mean value), since sampling is off while testing
             total_size=len(self.trainer.test_dataloaders.dataset),
             reweight_ll=True,  # up-weight LL so as to estimate the full dataset loss (can be averaged)
-            return_preds=True
+            return_preds=True,
         )
 
         _ = self.test_acc(probs.squeeze(), y_batch)
 
-        self.log('test_loss', loss.item())  # Lightning automatically averages scalars over batches for testing
-        self.log('test_acc', self.test_acc)  # the batch size is considered when logging torchmetrics.Metric objects
+        self.log("test_loss", loss.item())  # Lightning automatically averages scalars over batches for testing
+        self.log("test_acc", self.test_acc)  # the batch size is considered when logging torchmetrics.Metric objects
 
         return loss
 
@@ -476,27 +474,23 @@ class VarClassifier(LightningModule):
     def on_test_epoch_start(self) -> None:
         self.sample(False)  # turn off sampling for testing
 
-    def configure_optimizers(
-        self
-    ) -> tuple[list[torch.optim.Optimizer], list[torch.optim.lr_scheduler.LRScheduler]]:
+    def configure_optimizers(self) -> tuple[list[torch.optim.Optimizer], list[torch.optim.lr_scheduler.LRScheduler]]:
 
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
 
         # create reduce-on-plateau schedule
-        # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        #     optimizer=optimizer
-        # )
+        # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer)
 
         # create cosine annealing schedule
         lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             optimizer=optimizer,
-            T_max=self.trainer.max_epochs
+            T_max=self.trainer.max_epochs,
         )
 
         # lr_config = {
-        #     'scheduler': lr_scheduler,  # LR scheduler
-        #     'interval': 'epoch',  # time unit
-        #     'frequency': 1  # update frequency
+        #     "scheduler": lr_scheduler,  # LR scheduler
+        #     "interval": "epoch",  # time unit
+        #     "frequency": 1,  # update frequency
         # }
 
         return [optimizer], [lr_scheduler]

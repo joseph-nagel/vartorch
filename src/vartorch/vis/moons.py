@@ -1,4 +1,4 @@
-'''For the half-moons example.'''
+"""For the half-moons example."""
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,9 +10,9 @@ def plot_data_2d(
     y,
     labels=None,
     colors=None,
-    ax=None
+    ax=None,
 ):
-    '''Plot data points with labels on a two-dim. plane.'''
+    """Plot data points with labels on a two-dim. plane."""
 
     if ax is None:
         fig, ax = plt.subplots()
@@ -24,16 +24,16 @@ def plot_data_2d(
 
     for idx, label in enumerate(labels):
         ax.scatter(
-            X[y==label, 0],
-            X[y==label, 1],
+            X[y == label, 0],
+            X[y == label, 1],
             color=None if colors is None else colors[idx],
             alpha=0.7,
-            edgecolors='none',
-            label=f'y={label}'
+            edgecolors="none",
+            label=f"y={label}",
         )
 
-    ax.set_xlabel('$x_1$')
-    ax.set_ylabel('$x_2$')
+    ax.set_xlabel("$x_1$")
+    ax.set_ylabel("$x_2$")
 
     if fig is None:
         return ax
@@ -47,9 +47,9 @@ def plot_function_2d(
     x_limits=None,
     y_limits=None,
     colorbar=True,
-    ax=None
+    ax=None,
 ):
-    '''Plot a function of two features on the plane.'''
+    """Plot a function of two features on the plane."""
 
     if ax is None:
         fig, ax = plt.subplots()
@@ -76,11 +76,11 @@ def plot_function_2d(
     # plot function
     im1 = ax.imshow(
         z_grid,
-        origin='lower',
+        origin="lower",
         extent=(*x_limits, *y_limits),
-        interpolation='bicubic',
-        cmap='Greys',
-        alpha=0.4
+        interpolation="bicubic",
+        cmap="Greys",
+        alpha=0.4,
     )
 
     im2 = ax.contour(
@@ -88,14 +88,14 @@ def plot_function_2d(
         y_grid,
         z_grid,
         levels=levels,
-        colors='black',
-        alpha=0.6
+        colors="black",
+        alpha=0.6,
     )
 
     if colorbar:
         plt.colorbar(im1, ax=ax)
 
-    plt.clabel(im2, fmt='%1.2f')
+    plt.clabel(im2, fmt="%1.2f")
 
     if fig is None:
         return ax
@@ -111,23 +111,23 @@ def plot_data_and_preds_2d(
     xlim=(-2, 3),
     ylim=(-2, 2.5),
     levels=(0.3, 0.5, 0.7),
-    title='Data and predictions'
+    title="Data and predictions",
 ):
-    '''Plot data and predictions.'''
+    """Plot data and predictions."""
     fig, ax = plt.subplots(figsize=figsize)
     plot_data_2d(x_data, y_data, colors=(plt.cm.Set1(1), plt.cm.Set1(0)), ax=ax)
     ax.set(xlim=xlim, ylim=ylim)  # set limits before 2D function is plotted
     plot_function_2d(pred_function, levels=levels, ax=ax)
-    ax.set_aspect('equal', adjustable='box')
+    ax.set_aspect("equal", adjustable="box")
     ax.set_title(title)
-    ax.legend(loc='upper left')
+    ax.legend(loc="upper left")
     fig.tight_layout()
     return fig, ax
 
 
 @torch.no_grad()
 def point_prediction(model, x):
-    '''Compute normal point predictions.'''
+    """Compute normal point predictions."""
     x_tensor = torch.tensor(x, dtype=torch.float32)
 
     model.train(False)  # turn off train mode
@@ -139,7 +139,7 @@ def point_prediction(model, x):
 
 @torch.no_grad()
 def post_mean(var_model, x):
-    '''Predict with posterior mean weights.'''
+    """Predict with posterior mean weights."""
     x_tensor = torch.tensor(x, dtype=torch.float32)
 
     var_model.train(False)  # turn off train mode
@@ -152,7 +152,7 @@ def post_mean(var_model, x):
 
 @torch.no_grad()
 def post_predictive(var_model, x, num_samples=100):
-    '''Predict according to the posterior predictive distribution.'''
+    """Predict according to the posterior predictive distribution."""
     x_tensor = torch.tensor(x, dtype=torch.float32)
 
     var_model.train(False)  # turn off train mode
@@ -167,7 +167,7 @@ def post_predictive(var_model, x, num_samples=100):
 
 @torch.no_grad()
 def post_uncertainty(var_model, x, num_samples=100):
-    '''Compute the uncertainty associated with the posterior predictive.'''
+    """Compute the uncertainty associated with the posterior predictive."""
     x_tensor = torch.tensor(x, dtype=torch.float32)
 
     var_model.train(False)  # turn off train mode

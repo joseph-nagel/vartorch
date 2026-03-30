@@ -1,4 +1,4 @@
-'''
+"""
 Analysis tools.
 
 Summary
@@ -15,7 +15,7 @@ This establishes the basis for the reliability diagram and its associated
 calibration metrics such as the expected or maximum calibration error.
 A frequentist notion of well-calibration can be investigated thereby.
 
-'''
+"""
 
 from typing import Any
 
@@ -30,12 +30,12 @@ from torch.utils.data import DataLoader
 def anomaly_score(
     model: nn.Module,
     data_loader: DataLoader,
-    mode: str = 'entropy',
+    mode: str = "entropy",
     num_epochs: int = 1,
     threshold: float = 0.5,
-    **kwargs: Any
+    **kwargs: Any,
 ) -> np.ndarray:
-    '''
+    """
     Compute anomaly score.
 
     Summary
@@ -52,14 +52,14 @@ def anomaly_score(
         Logits-predicting model.
     data_loader : PyTorch data loader
         Data-generating loader.
-    mode : {'entropy', 'maxprob'}
+    mode : {"entropy", "maxprob"}
         Determines the score type.
     num_epochs : int
         Number of epochs.
     threshold : float
         Binary probability threshold.
 
-    '''
+    """
 
     # turn off train mode
     model.train(False)
@@ -70,13 +70,13 @@ def anomaly_score(
         data_loader,
         num_epochs,
         threshold,
-        **kwargs
+        **kwargs,
     )
 
     # calculate scores
-    if mode == 'entropy':
+    if mode == "entropy":
         score_tensor = _entropy(probs)
-    elif mode == 'maxprob':
+    elif mode == "maxprob":
         score_tensor = _maxprob_score(top_prob)
 
     # transform to array
@@ -86,7 +86,7 @@ def anomaly_score(
 
 
 def _entropy(probs: torch.Tensor) -> torch.Tensor:
-    '''Compute entropy score.'''
+    """Compute entropy score."""
     # compute Bernoulli entropy (binary classifier)
     if probs.shape[-1] == 1:
         entropy = dist.Bernoulli(probs=probs).entropy()
@@ -97,7 +97,7 @@ def _entropy(probs: torch.Tensor) -> torch.Tensor:
 
 
 def _maxprob_score(top_prob: torch.Tensor) -> torch.Tensor:
-    '''Compute maxprob score.'''
+    """Compute maxprob score."""
     return 1 - top_prob
 
 
@@ -108,9 +108,9 @@ def calibration_metrics(
     num_bins: int = 10,
     num_epochs: int = 1,
     threshold: float = 0.5,
-    **kwargs: Any
+    **kwargs: Any,
 ) -> tuple[np.ndarray, np.ndarray, dict[str, np.ndarray]]:
-    '''
+    """
     Evaluate calibration metrics.
 
     Summary
@@ -134,7 +134,7 @@ def calibration_metrics(
     threshold : float
         Binary probability threshold.
 
-    '''
+    """
 
     # turn off train mode
     model.train(False)
@@ -145,7 +145,7 @@ def calibration_metrics(
         data_loader,
         num_epochs,
         threshold,
-        **kwargs
+        **kwargs,
     )
 
     # transform to arrays
@@ -154,31 +154,32 @@ def calibration_metrics(
     top_prob = _make_array(top_prob_tensor).squeeze()
 
     # calculate confidence bins and accuracies
-    conf_edges = np.linspace(0, 1, num_bins+1)
+    conf_edges = np.linspace(0, 1, num_bins + 1)
     binned_conf = (conf_edges[1:] + conf_edges[:-1]) / 2
 
     binned_acc = np.zeros(num_bins)
-    binned_num_samples = np.zeros(num_bins, dtype='int')
+    binned_num_samples = np.zeros(num_bins, dtype="int")
 
     for idx in range(num_bins):
         lower = conf_edges[idx]
-        upper = conf_edges[idx+1]
+        upper = conf_edges[idx + 1]
 
         ids = np.where(np.logical_and(top_prob >= lower, top_prob < upper))[0]
 
         binned_num_samples[idx] = len(ids)
-        binned_acc[idx] = (np.sum(labels[ids] == top_class[ids])) / binned_num_samples[idx] \
-                          if binned_num_samples[idx] != 0 else np.nan
+        binned_acc[idx] = (
+            (np.sum(labels[ids] == top_class[ids])) / binned_num_samples[idx]
+            if binned_num_samples[idx] != 0
+            else np.nan
+        )
 
     # calculate calibration errors
-    binned_ce, ece, mce = _calibration_errors(
-        binned_conf, binned_acc, binned_num_samples
-    )
+    binned_ce, ece, mce = _calibration_errors(binned_conf, binned_acc, binned_num_samples)
 
     ce_dict = {
-        'CEs': binned_ce,
-        'ECE': ece,
-        'MCE': mce
+        "CEs": binned_ce,
+        "ECE": ece,
+        "MCE": mce,
     }
 
     return conf_edges, binned_acc, ce_dict
@@ -188,9 +189,9 @@ def calibration_metrics(
 def _calibration_errors(
     binned_conf: np.ndarray,
     binned_acc: np.ndarray,
-    binned_num_samples: np.ndarray
+    binned_num_samples: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    '''Compute calibration errors (bin-wise, expected and maximum).'''
+    """Compute calibration errors (bin-wise, expected and maximum)."""
     binned_ce = np.abs(binned_acc - binned_conf)
 
     mce = np.max([e for e in binned_ce if not np.isnan(e)])
@@ -205,9 +206,9 @@ def _extract_predict(
     data_loader: DataLoader,
     num_epochs: int = 1,
     threshold: float = 0.5,
-    **kwargs: Any
+    **kwargs: Any,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-    '''
+    """
     Extract labels from a data loader and model predictions.
 
     Summary
@@ -226,13 +227,13 @@ def _extract_predict(
     threshold : float
         Binary probability threshold.
 
-    '''
+    """
 
     # set device
-    if hasattr(model, 'device'):
+    if hasattr(model, "device"):
         device = model.device
     else:
-        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # turn off train mode
     model.train(False)
@@ -243,12 +244,11 @@ def _extract_predict(
 
     for _ in range(num_epochs):
         for x_batch, y_batch in data_loader:
-
             x_batch = x_batch.to(device)
             y_batch = y_batch.to(device)
 
             # predict probabilities directly
-            if hasattr(model, 'predict_proba'):
+            if hasattr(model, "predict_proba"):
                 batch_probs = model.predict_proba(x_batch, **kwargs)
 
             # predict logits first
@@ -270,7 +270,7 @@ def _extract_predict(
     # get top class and probability
     if probs.shape[-1] == 1:  # binary classifier
         top_class = (probs >= threshold).int()
-        top_prob = torch.where(top_class==1, probs, 1 - probs)
+        top_prob = torch.where(top_class == 1, probs, 1 - probs)
 
     else:  # multi-class classifier
         top_prob, top_class = torch.topk(probs, k=1, dim=1)
@@ -279,5 +279,5 @@ def _extract_predict(
 
 
 def _make_array(tensor: torch.Tensor) -> np.ndarray:
-    '''Transform tensor into array.'''
+    """Transform tensor into array."""
     return tensor.detach().cpu().numpy()

@@ -1,4 +1,4 @@
-'''
+"""
 Datamodules.
 
 Modules
@@ -6,7 +6,7 @@ Modules
 mnist : MNIST datamodule.
 moons : Half-moons datamodule.
 
-'''
+"""
 
 from . import mnist, moons
 from .mnist import MNISTDataModule

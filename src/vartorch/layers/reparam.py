@@ -1,4 +1,4 @@
-'''
+"""
 Reparametrization trick.
 
 Summary
@@ -6,7 +6,7 @@ Summary
 `Reparametrize` implements the reparametrization trick for the MC estimation of the ELBO.
 It can be used as component for building advanced layers.
 
-'''
+"""
 
 import torch
 
@@ -15,13 +15,9 @@ from .base import VarLayer
 
 
 class Reparametrize(VarLayer):
-    '''Reparametrization trick.'''
+    """Reparametrization trick."""
 
-    def forward(
-        self,
-        mu: torch.Tensor,
-        sigma_param: torch.Tensor
-    ) -> torch.Tensor:
+    def forward(self, mu: torch.Tensor, sigma_param: torch.Tensor) -> torch.Tensor:
 
         # sample around the mean
         if self.sampling:

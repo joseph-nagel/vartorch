@@ -1,4 +1,4 @@
-'''Conv. variational classifier.'''
+"""Conv. variational classifier."""
 
 from collections.abc import Sequence
 
@@ -10,7 +10,7 @@ from .base import VarClassifier
 
 
 class ConvVarClassifier(VarClassifier):
-    '''
+    """
     Conv. variational classifier.
 
     Parameters
@@ -39,17 +39,17 @@ class ConvVarClassifier(VarClassifier):
         Prior std. of the weights.
     bias_std : float
         Prior std. of the biases.
-    param_mode : {'log', 'rho'}
+    param_mode : {"log", "rho"}
         Determines how the non-negative standard deviation
         is represented in terms of a real-valued parameter.
     num_samples : int
         Number of MC samples to simulate the ELBO.
-    likelihood_type : {'Bernoulli', 'Categorical'}
+    likelihood_type : {"Bernoulli", "Categorical"}
         Likelihood function type.
     lr : float
         Initial optimizer learning rate.
 
-    '''
+    """
 
     def __init__(
         self,
@@ -58,60 +58,60 @@ class ConvVarClassifier(VarClassifier):
         kernel_size: IntOrInts = 3,
         pooling: IntOrInts | None = 2,
         batchnorm: bool = False,
-        activation: ActivType | None = 'leaky_relu',
+        activation: ActivType | None = "leaky_relu",
         last_activation: ActivType | None = None,
         drop_rate: float | None = None,
         pool_last: bool = True,
         double_conv: bool = True,
         weight_std: float = 1.0,
         bias_std: float = 1.0,
-        param_mode: str = 'log',
+        param_mode: str = "log",
         num_samples: int = 1,
-        likelihood_type: str = 'Categorical',
-        lr: float = 1e-04
+        likelihood_type: str = "Categorical",
+        lr: float = 1e-04,
     ):
 
         # check feature numbers
         if len(num_features) < 2:
-            raise ValueError('Number of features needs at least two entries')
+            raise ValueError("Number of features needs at least two entries")
 
         # get number of classes
-        if likelihood_type == 'Bernoulli':
+        if likelihood_type == "Bernoulli":
             if num_features[-1] == 1:
                 num_classes = 2
             else:
-                ValueError('Bernoulli likelihood requires a single output')
+                ValueError("Bernoulli likelihood requires a single output")
 
-        elif likelihood_type == 'Categorical':
+        elif likelihood_type == "Categorical":
             if num_features[-1] > 1:
                 num_classes = num_features[-1]
             else:
-                ValueError('Categorical likelihood requires multiple outputs')
+                ValueError("Categorical likelihood requires multiple outputs")
 
         else:
-            raise ValueError(f'Unknown likelihood type: {likelihood_type}')
+            raise ValueError(f"Unknown likelihood type: {likelihood_type}")
 
         # create conv layers
         conv_layers = ConvDown(
             num_channels=num_channels,
             kernel_size=kernel_size,
-            padding='same',
+            padding="same",
             stride=1,
             pooling=pooling,
             batchnorm=batchnorm,
             activation=activation,
-            last_activation='same',
+            last_activation="same",
             normalize_last=True,
             pool_last=pool_last,
             double_conv=double_conv,
-            inout_first=True
+            inout_first=True,
         )
 
         # create dense variational layers
         var_opts = {
-            'weight_std': weight_std,
-            'bias_std': bias_std,
-            'param_mode': param_mode
+            "weight_std": weight_std,
+            "bias_std": bias_std,
+            "param_mode": param_mode,
         }
 
         dense_layers = DenseBlock(
@@ -122,14 +122,14 @@ class ConvVarClassifier(VarClassifier):
             normalize_last=False,
             drop_rate=drop_rate,
             variational=True,
-            var_opts=var_opts
+            var_opts=var_opts,
         )
 
         # assemble model
         model = nn.Sequential(
             conv_layers,
             nn.Flatten(start_dim=1),
-            dense_layers
+            dense_layers,
         )
 
         # initialize parent class
@@ -138,7 +138,7 @@ class ConvVarClassifier(VarClassifier):
             num_samples=num_samples,
             likelihood_type=likelihood_type,
             num_classes=num_classes,
-            lr=lr
+            lr=lr,
         )
 
         # store hyperparams

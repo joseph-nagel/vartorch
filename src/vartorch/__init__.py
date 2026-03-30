@@ -1,4 +1,4 @@
-'''
+"""
 Variational inference for Bayesian neural nets with PyTorch.
 
 Summary
@@ -20,7 +20,7 @@ reparam : Reparametrization issues.
 var : Variational models.
 vis : Visualization tools.
 
-'''
+"""
 
 from . import (
     data,
@@ -29,18 +29,10 @@ from . import (
     model,
     metrics,
     reparam,
-    vis
+    vis,
 )
-from .data import (
-    make_half_moons,
-    MoonsDataModule,
-    MNISTDataModule
-)
-from .kldiv import (
-    kl_div_dist,
-    kl_div_analytical,
-    kl_div_mc
-)
+from .data import make_half_moons, MoonsDataModule, MNISTDataModule
+from .kldiv import kl_div_dist, kl_div_analytical, kl_div_mc
 from .layers import (
     VarLayer,
     VarLinear,
@@ -53,7 +45,7 @@ from .layers import (
     make_dense,
     make_conv,
     SingleConv,
-    DoubleConv
+    DoubleConv,
 )
 from .metrics import anomaly_score, calibration_metrics
 from .model import DenseBlock
@@ -62,14 +54,9 @@ from .reparam import (
     sigma_from_log,
     sigma_from_rho,
     log_from_sigma,
-    rho_from_sigma
-
+    rho_from_sigma,
 )
-from .var import (
-    VarClassifier,
-    ConvVarClassifier,
-    DenseVarClassifier
-)
+from .var import VarClassifier, ConvVarClassifier, DenseVarClassifier
 from .vis import (
     plot_point_predictions,
     plot_post_predictions,
@@ -80,5 +67,5 @@ from .vis import (
     point_prediction,
     post_mean,
     post_predictive,
-    post_uncertainty
+    post_uncertainty,
 )

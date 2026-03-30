@@ -1,4 +1,4 @@
-'''
+"""
 Variational base layer.
 
 Summary
@@ -7,7 +7,7 @@ A base class for variational layers is defined in `VarLayer`.
 This manages the main settings regarding the probabilistic weights.
 In particular, it comes with a parametrization mode and a sampling switch.
 
-'''
+"""
 
 from abc import ABC, abstractmethod
 
@@ -18,12 +18,12 @@ from ..reparam import (
     sigma_from_log,
     sigma_from_rho,
     log_from_sigma,
-    rho_from_sigma
+    rho_from_sigma,
 )
 
 
 class VarLayer(nn.Module, ABC):
-    '''
+    """
     Variational layer base class.
 
     Summary
@@ -34,13 +34,13 @@ class VarLayer(nn.Module, ABC):
 
     Parameters
     ----------
-    param_mode : {'log', 'rho'}
+    param_mode : {"log", "rho"}
         Parametrization type, i.e. how the non-negative standard
         deviation is represented in terms of a real-valued parameter.
 
-    '''
+    """
 
-    def __init__(self, param_mode: str = 'log'):
+    def __init__(self, param_mode: str = "log"):
         super().__init__()
 
         # set parametrization
@@ -55,34 +55,34 @@ class VarLayer(nn.Module, ABC):
 
     @property
     def parametrization(self) -> str:
-        '''Get parametrization mode.'''
+        """Get parametrization mode."""
         return self._parametrization
 
     @parametrization.setter
     def parametrization(self, param_mode: str) -> None:
-        '''Set parametrization mode.'''
+        """Set parametrization mode."""
 
         # set parametrization type
-        if param_mode in ('log', 'rho'):
+        if param_mode in ("log", "rho"):
             self._parametrization = param_mode
         else:
-            raise ValueError(f'Unknown parametrization: {param_mode}')
+            raise ValueError(f"Unknown parametrization: {param_mode}")
 
         # set parametrization functions
-        if param_mode == 'log':
+        if param_mode == "log":
             self.sigma = sigma_from_log
             self.sigma_inverse = log_from_sigma
 
-        elif param_mode == 'rho':
+        elif param_mode == "rho":
             self.sigma = sigma_from_rho
             self.sigma_inverse = rho_from_sigma
 
     @property
     def sampling(self) -> bool:
-        '''Get sampling mode.'''
+        """Get sampling mode."""
         return self._sampling
 
     @sampling.setter
     def sampling(self, sample_mode: bool):
-        '''Set sampling mode.'''
+        """Set sampling mode."""
         self._sampling = sample_mode

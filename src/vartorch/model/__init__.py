@@ -1,4 +1,4 @@
-'''
+"""
 Model blocks.
 
 Modules
@@ -6,7 +6,7 @@ Modules
 conv : Conv. models.
 dense : Dense models.
 
-'''
+"""
 
 from . import conv, dense
 from .conv import ConvDown

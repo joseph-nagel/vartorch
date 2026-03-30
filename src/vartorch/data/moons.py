@@ -1,4 +1,4 @@
-'''Half-moons datamodule.'''
+"""Half-moons datamodule."""
 
 from sklearn.datasets import make_moons
 from sklearn.model_selection import train_test_split
@@ -12,9 +12,9 @@ def make_half_moons(
     noise_level: float = 0.15,
     offsets: tuple[float, float] = (0.15, -0.15),
     random_state: int | None = None,
-    test_size: int | float | None = None
+    test_size: int | float | None = None,
 ):
-    '''
+    """
     Create half-moons data.
 
     Parameters
@@ -30,14 +30,14 @@ def make_half_moons(
     test_size : int, float or None
         Test size parameter.
 
-    '''
+    """
 
     # create data
     x, y = make_moons(
         num_samples,
         shuffle=True,
         noise=abs(noise_level),
-        random_state=random_state
+        random_state=random_state,
     )
 
     # center data
@@ -45,8 +45,8 @@ def make_half_moons(
     x[:, 1] -= 0.25
 
     # add class-specific offsets
-    x[y==0, 1] += offsets[0]
-    x[y==1, 1] += offsets[1]
+    x[y == 0, 1] += offsets[0]
+    x[y == 1, 1] += offsets[1]
 
     # return
     if test_size is None:
@@ -54,17 +54,13 @@ def make_half_moons(
 
     # split data and return
     else:
-        x_train, x_val, y_train, y_val = train_test_split(
-            x,
-            y,
-            test_size=test_size
-        )
+        x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=test_size)
 
         return x_train, x_val, y_train, y_val
 
 
 class MoonsDataModule(LightningDataModule):
-    '''
+    """
     DataModule for half-moons data.
 
     Parameters
@@ -86,7 +82,7 @@ class MoonsDataModule(LightningDataModule):
     num_workers : int
         Number of workers for the loader.
 
-    '''
+    """
 
     def __init__(
         self,
@@ -97,7 +93,7 @@ class MoonsDataModule(LightningDataModule):
         offsets: tuple[float, float] = (0.15, -0.15),
         random_state: int | None = 42,
         batch_size: int = 32,
-        num_workers: int = 0
+        num_workers: int = 0,
     ):
         super().__init__()
 
@@ -116,7 +112,7 @@ class MoonsDataModule(LightningDataModule):
         self.num_workers = num_workers
 
     def prepare_data(self) -> None:
-        '''Prepare numerical data.'''
+        """Prepare numerical data."""
 
         # create data
         num_samples = self.num_train + self.num_val + self.num_test
@@ -126,7 +122,7 @@ class MoonsDataModule(LightningDataModule):
             noise_level=self.noise_level,
             offsets=self.offsets,
             random_state=self.random_state,
-            test_size=None
+            test_size=None,
         )
 
         # transform to tensor
@@ -135,78 +131,78 @@ class MoonsDataModule(LightningDataModule):
 
     @property
     def x_train(self) -> torch.Tensor:
-        return self.x[:self.num_train]
+        return self.x[: self.num_train]
 
     @property
     def y_train(self) -> torch.Tensor:
-        return self.y[:self.num_train]
+        return self.y[: self.num_train]
 
     @property
     def x_val(self) -> torch.Tensor:
-        return self.x[self.num_train:self.num_train+self.num_val]
+        return self.x[self.num_train : self.num_train + self.num_val]
 
     @property
     def y_val(self) -> torch.Tensor:
-        return self.y[self.num_train:self.num_train+self.num_val]
+        return self.y[self.num_train : self.num_train + self.num_val]
 
     @property
     def x_test(self) -> torch.Tensor:
-        return self.x[self.num_train+self.num_val:]
+        return self.x[self.num_train + self.num_val :]
 
     @property
     def y_test(self) -> torch.Tensor:
-        return self.y[self.num_train+self.num_val:]
+        return self.y[self.num_train + self.num_val :]
 
     def setup(self, stage: str) -> None:
-        '''Set up train/test/val. datasets.'''
+        """Set up train/test/val. datasets."""
 
         # create train/val. datasets
-        if stage in ('fit', 'validate'):
+        if stage in ("fit", "validate"):
             self.train_set = TensorDataset(self.x_train, self.y_train)
             self.val_set = TensorDataset(self.x_val, self.y_val)
 
         # create test dataset
-        elif stage == 'test':
+        elif stage == "test":
             self.test_set = TensorDataset(self.x_test, self.y_test)
 
     def train_dataloader(self) -> DataLoader:
-        '''Create train dataloader.'''
-        if hasattr(self, 'train_set'):
+        """Create train dataloader."""
+        if hasattr(self, "train_set"):
             return DataLoader(
                 self.train_set,
                 batch_size=self.batch_size,
                 drop_last=True,
                 shuffle=True,
                 num_workers=self.num_workers,
-                pin_memory=self.num_workers > 0
+                pin_memory=self.num_workers > 0,
             )
         else:
-            raise AttributeError('Train set has not been set')
+            raise AttributeError("Train set has not been set")
 
     def val_dataloader(self) -> DataLoader:
-        '''Create val. dataloader.'''
-        if hasattr(self, 'val_set'):
+        """Create val. dataloader."""
+        if hasattr(self, "val_set"):
             return DataLoader(
                 self.val_set,
                 batch_size=self.batch_size,
                 drop_last=False,
                 shuffle=False,
                 num_workers=self.num_workers,
-                pin_memory=self.num_workers > 0
+                pin_memory=self.num_workers > 0,
             )
         else:
-            raise AttributeError('Val. set has not been set')
+            raise AttributeError("Val. set has not been set")
 
     def test_dataloader(self) -> DataLoader:
-        '''Create test dataloader.'''
-        if hasattr(self, 'test_set'):
+        """Create test dataloader."""
+        if hasattr(self, "test_set"):
             return DataLoader(
                 self.test_set,
                 batch_size=self.batch_size,
                 drop_last=False,
                 shuffle=False,
                 num_workers=self.num_workers,
-                pin_memory=self.num_workers > 0
+                pin_memory=self.num_workers > 0,
             )
         else:
-            raise AttributeError('Test set has not been set')
+            raise AttributeError("Test set has not been set")
