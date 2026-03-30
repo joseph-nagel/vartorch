@@ -100,7 +100,7 @@ class VarClassifier(LightningModule):
         self.sample(True)
 
         # store hyperparams
-        self.save_hyperparameters(ignore="model", logger=True)
+        self.save_hyperparameters(ignore="model")
 
         # create accuracy metrics
         if self.likelihood_type == "Bernoulli":
