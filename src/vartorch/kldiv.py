@@ -13,7 +13,7 @@ It assumes Gaussians with arbitrary diagonal covariances.
 Similarly, `kl_div_analytical` is an analytical version for the case
 that the covariance of the prior distribution is an identity matrix.
 
-A single-sample Monte Carlo estimate can be computed `kl_div_montecarlo`.
+A single-sample Monte Carlo estimate can be computed with `kl_div_montecarlo`.
 It can be used in conjunction with black-box variational inference schemes.
 
 """

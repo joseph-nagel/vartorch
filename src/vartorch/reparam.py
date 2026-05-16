@@ -9,7 +9,7 @@ During the MC simulation of the loss, it transforms the expectation over the
 variational posterior into an expectation over a standardized distribution.
 Consequentially, one can exchange the gradient and the expectation operator.
 The gradient of an expectation has been eventually expressed as an expectation of a gradient,
-which allows for MC sampling to estimate of the gradient with backpropagation.
+which allows for MC sampling to estimate the gradient with backpropagation.
 
 A second parametrization issue emerges for the standard deviation of the variational distribution.
 While it is non-negative, it should be represented by a real-valued and possibly negative parameter.
