@@ -154,7 +154,7 @@ class MoonsDataModule(LightningDataModule):
         return self.y[self.num_train + self.num_val :]
 
     def setup(self, stage: str) -> None:
-        """Set up train/test/val. datasets."""
+        """Set up train/val./test datasets."""
 
         # create train/val. datasets
         if stage in ("fit", "validate"):
@@ -174,7 +174,7 @@ class MoonsDataModule(LightningDataModule):
                 drop_last=True,
                 shuffle=True,
                 num_workers=self.num_workers,
-                pin_memory=self.num_workers > 0,
+                pin_memory=self.num_workers > 0,  # use page-locked memory if data is fetched in a parallel subprocess
             )
         else:
             raise AttributeError("Train set has not been set")
